@@ -1,3 +1,10 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Create the RemoteEvent
+local remoteEvent = Instance.new("RemoteEvent")
+remoteEvent.Name = "JumpRequestEvent"
+remoteEvent.Parent = ReplicatedStorage
+
 game.Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(char)
         local HRP = char:WaitForChild("HumanoidRootPart")
@@ -39,53 +46,26 @@ game.Players.PlayerAdded:Connect(function(player)
         Weld.Part0 = HRP
         Weld.Part1 = marble
 
-        -- Set the character to PlatformStand to prevent regular walking
+        -- Set the character to PlatformStand to prevent walking
         Hum.PlatformStand = true
 
-        -- Camera follows the torso
-        local camera = workspace.CurrentCamera
-        camera.CameraType = Enum.CameraType.Scriptable
-
-        game:GetService("RunService").Heartbeat:Connect(function()
-            local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
-            if torso then
-                local cameraOffset = Vector3.new(0, 10, 20) -- Fixed offset above and behind the torso
-                local targetPosition = torso.Position + cameraOffset
-                camera.CFrame = CFrame.new(camera.CFrame.Position:Lerp(targetPosition, 0.1), torso.Position) -- Smoother camera transitions
-            end
-        end)
-
-        -- Control the marble's movement smoothly
-        local function lerp(a, b, t)
-            return a + (b - a) * t
-        end
-
-        local targetAngularVelocity = Vector3.zero
-        local smoothingFactor = 0.05 -- Increased for much smoother transitions
-        local moveSpeed = 40 -- Adjusted for smoother movement
-
-        -- Ensure marble has mass to interact properly with physics
-        marble.Massless = false
-
+        -- Handle movement as before
         game:GetService("RunService").Heartbeat:Connect(function()
             local moveDirection = char.Humanoid.MoveDirection
 
             -- Calculate target angular velocity based on move direction
-            targetAngularVelocity = Vector3.new(
+            local targetAngularVelocity = Vector3.new(
                 moveDirection.Z * 20, -- Reduced for smoother rotation
                 0,
                 moveDirection.X * -20
             )
-            -- uncomment for spinning
-            -- -- Update angular velocity smoothly
-            -- Velocity.AngularVelocity = Vector3.new(
-            --     lerp(Velocity.AngularVelocity.X, targetAngularVelocity.X, smoothingFactor),
-            --     lerp(Velocity.AngularVelocity.Y, targetAngularVelocity.Y, smoothingFactor),
-            --     lerp(Velocity.AngularVelocity.Z, targetAngularVelocity.Z, smoothingFactor)
-            -- )
+
+            --uncomment for spinning
+            -- Update angular velocity smoothly
+            -- Velocity.AngularVelocity = targetAngularVelocity
 
             -- Set BodyVelocity to move the marble in the desired direction
-            BodyVelocity.Velocity = moveDirection * moveSpeed -- Adjust speed as necessary
+            BodyVelocity.Velocity = moveDirection * 40 -- Adjust speed as necessary
 
             -- Enable torque only when moving
             if moveDirection.Magnitude == 0 then
@@ -95,5 +75,27 @@ game.Players.PlayerAdded:Connect(function(player)
                 Velocity.MaxTorque = Vector3.new(30000, 30000, 30000)
             end
         end)
+
+        remoteEvent.OnServerEvent:Connect(function(plr)
+            if plr == player then
+                local groundCheck = marble.Position.Y - workspace.Baseplate.Position.Y
+                if groundCheck <= 15 then -- Simple check for ground contact
+                    local jumpForce = 5000 -- Adjust the jump force as needed
+        
+                    -- Disable the Weld
+                    Weld.Enabled = false
+                    
+                    -- Apply the jump impulse
+                    marble:ApplyImpulse(Vector3.new(0, jumpForce, 0))
+        
+                    -- Re-enable the Weld after a short delay
+                    task.wait(0.01) -- Adjust the delay if necessary
+                    Weld.Enabled = true
+        
+                    print("Jump simulated")
+                end
+            end
+        end)
+        
     end)
 end)
