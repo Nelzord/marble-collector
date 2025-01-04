@@ -5,6 +5,11 @@ local remoteEvent = Instance.new("RemoteEvent")
 remoteEvent.Name = "JumpRequestEvent"
 remoteEvent.Parent = ReplicatedStorage
 
+local marbleColorChangeEvent = Instance.new("RemoteEvent")
+marbleColorChangeEvent.Name = "MarbleColorChangeEvent"
+marbleColorChangeEvent.Parent = ReplicatedStorage
+
+
 game.Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(char)
         local HRP = char:WaitForChild("HumanoidRootPart")
@@ -48,6 +53,14 @@ game.Players.PlayerAdded:Connect(function(player)
 
         -- Set the character to PlatformStand to prevent walking
         Hum.PlatformStand = true
+
+        -- Handle marble color change
+        marbleColorChangeEvent.OnServerEvent:Connect(function(plr, selectedColor)
+            if plr == player then
+                marble.Color = selectedColor
+                print(plr.Name .. " changed their marble to color:", tostring(selectedColor))
+            end
+        end)
 
         -- Handle movement as before
         game:GetService("RunService").Heartbeat:Connect(function()
