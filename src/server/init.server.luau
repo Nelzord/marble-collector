@@ -89,26 +89,37 @@ game.Players.PlayerAdded:Connect(function(player)
             end
         end)
 
-        remoteEvent.OnServerEvent:Connect(function(plr)
-            if plr == player then
-                local groundCheck = marble.Position.Y - workspace.Baseplate.Position.Y
-                if groundCheck <= 15 then -- Simple check for ground contact
-                    local jumpForce = 5000 -- Adjust the jump force as needed
-        
-                    -- Disable the Weld
-                    Weld.Enabled = false
-                    
-                    -- Apply the jump impulse
-                    marble:ApplyImpulse(Vector3.new(0, jumpForce, 0))
-        
-                    -- Re-enable the Weld after a short delay
-                    task.wait(0.01) -- Adjust the delay if necessary
-                    Weld.Enabled = true
-        
-                    print("Jump simulated")
-                end
-            end
-        end)
+        -- Replace the groundCheck logic with Raycasting
+remoteEvent.OnServerEvent:Connect(function(plr)
+    if plr == player then
+        -- Raycast downward to check if the marble is grounded
+        local rayOrigin = marble.Position
+        local rayDirection = Vector3.new(0, -5, 0) -- Adjust ray length as needed
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterDescendantsInstances = {marble, char} -- Ignore marble and character
+        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+        local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+
+        -- If the ray hits a surface, the marble is grounded
+        if result then
+            local jumpForce = 5000 -- Adjust the jump force as needed
+
+            -- Disable and remove the Weld
+            Weld.Enabled = false
+
+            -- Apply the jump impulse
+            marble:ApplyImpulse(Vector3.new(0, jumpForce, 0))
+
+            -- Re-enable the Weld after a short delay
+            task.wait(0.01) -- Adjust the delay as necessary
+            Weld.Enabled = true
+
+            print("Jump simulated on surface:", result.Instance.Name)
+        end
+    end
+end)
+
         
     end)
 end)
