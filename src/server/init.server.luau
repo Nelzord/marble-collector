@@ -20,7 +20,7 @@ game.Players.PlayerAdded:Connect(function(player)
         -- Create the marble
         local marble = Instance.new("Part")
         marble.Size = Vector3.new(8, 8, 8)
-        marble.BrickColor = BrickColor.Random()
+        marble.BrickColor = BrickColor.Black()
         marble.Transparency = 0.5
         marble.Shape = Enum.PartType.Ball
         marble.Material = Enum.Material.SmoothPlastic
@@ -76,7 +76,7 @@ game.Players.PlayerAdded:Connect(function(player)
             )
 
             -- Uncomment for spinning effect
-            -- Velocity.AngularVelocity = targetAngularVelocity
+            Velocity.AngularVelocity = targetAngularVelocity
 
             -- Set BodyVelocity to move the marble in the desired direction
             BodyVelocity.Velocity = moveDirection * 40 -- Adjust speed as necessary

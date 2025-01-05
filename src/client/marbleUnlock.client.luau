@@ -24,7 +24,7 @@ notificationTemplate.Parent = screenGui
 -- Load and play a success sound
 local successSound = Instance.new("Sound")
 successSound.SoundId = "rbxassetid://2789427964" -- Replace with a valid sound asset ID
-successSound.Volume = .25
+successSound.Volume = 0.25
 successSound.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Function to show a marble unlock notification
@@ -33,11 +33,31 @@ local function showNotification(marbleName)
     notification.Text = "You unlocked: " .. marbleName .. "!"
     notification.Visible = true
     notification.Parent = screenGui
-    
+
     -- Play the success sound
     successSound:Play()
-    
-    -- Fade out and remove the notification
+
+    -- Additional logic for Speedy Red
+    if marbleName == "Speedy Red" then
+        local secondaryNotification = notificationTemplate:Clone()
+        secondaryNotification.Text = "Select new marble from inventory!"
+        secondaryNotification.Size = UDim2.new(0.3, 0, 0.08, 0)
+        secondaryNotification.Position = UDim2.new(0.35, 0, 0.55, 0)
+        secondaryNotification.Visible = true
+        secondaryNotification.Parent = screenGui
+
+        -- Fade out and remove the secondary notification
+        task.delay(3, function()
+            for i = 0, 1, 0.1 do
+                secondaryNotification.TextTransparency = i
+                secondaryNotification.BackgroundTransparency = i + 0.3
+                task.wait(0.1)
+            end
+            secondaryNotification:Destroy()
+        end)
+    end
+
+    -- Fade out and remove the main notification
     task.delay(3, function()
         for i = 0, 1, 0.1 do
             notification.TextTransparency = i
