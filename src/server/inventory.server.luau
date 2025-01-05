@@ -109,6 +109,16 @@ local function monitorMarble(player, character)
             print("Touched part parent:", hit.Parent)
             print("Touched part properties: CanCollide =", hit.CanCollide, ", Anchored =", hit.Anchored)
 
+            -- Handle hazard touch
+            if hit.Name == "Hazard" then
+                print(player.Name .. " touched a Hazard and will die.")
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.Health = 0 -- Kills the player
+                end
+                return
+            end
+            
             -- Check if the touched part matches any level unlock criteria
             for _, marbleData in ipairs(Marbles) do
                 if marbleData.LevelUnlocked == hit.Name then
