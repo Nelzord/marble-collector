@@ -31,7 +31,7 @@ local function spinObject(object, deltaTime)
         -- Calculate the rotation increment
         local increment = CFrame.Angles(0, math.rad(45 * deltaTime), 0) -- Adjust rotation speed as needed
         object.CFrame = object.CFrame * increment
-        print("Spinning:", object.Name)
+        -- print("Spinning:", object.Name)
     end
 end
 

@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace") 
 
 -- Create the RemoteEvent
 local remoteEvent = Instance.new("RemoteEvent")
@@ -122,3 +123,34 @@ game.Players.PlayerAdded:Connect(function(player)
         end)
     end)
 end)
+
+local TeleportToLevelEvent = Instance.new("RemoteEvent", ReplicatedStorage)
+TeleportToLevelEvent.Name = "TeleportToLevelEvent"
+
+-- Function to find a child recursively in Workspace
+local function findObjectInWorkspace(objectName)
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        if descendant.Name == objectName then
+            return descendant
+        end
+    end
+    return nil
+end
+
+-- Function to teleport the player
+local function teleportPlayerToLevel(player, levelLocation)
+    local levelObject = findObjectInWorkspace(levelLocation) -- Use the recursive search function
+    
+    if levelObject and levelObject:IsA("BasePart") then
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        humanoidRootPart.CFrame = levelObject.CFrame + Vector3.new(0, 5, 0) -- Teleport above the level object
+        print(player.Name .. " teleported to " .. levelLocation)
+    else
+        warn("Level object not found or is not a BasePart: " .. tostring(levelLocation))
+    end
+end
+
+
+-- Connect the RemoteEvent
+TeleportToLevelEvent.OnServerEvent:Connect(teleportPlayerToLevel)

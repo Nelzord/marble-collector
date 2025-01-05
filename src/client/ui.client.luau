@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 
 -- Load Marbles Data
 local Marbles = require(ReplicatedStorage.Shared.Marbles)
+local Levels = require(ReplicatedStorage.Shared.Levels)
 
 -- Index Marbles Data by Name for Quick Lookup
 local MarbleLookup = {}
@@ -16,11 +17,13 @@ end
 -- Fetch Inventory RemoteFunction
 local fetchInventoryFunction = ReplicatedStorage:WaitForChild("FetchInventoryFunction")
 local marbleColorChangeEvent = ReplicatedStorage:WaitForChild("MarbleColorChangeEvent")
+local teleportToLevelEvent = ReplicatedStorage:WaitForChild("TeleportToLevelEvent") 
 
 -- Create the ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MainUI"
 screenGui.Parent = PlayerGui
+
 
 -- Helper function to create buttons
 local function createButton(name, text, position)
@@ -41,6 +44,8 @@ end
 -- Define button positions
 local screenWidthOffset = -160
 local buttonSpacing = 60
+
+    
 
 -- Create buttons
 local inventoryButton = createButton(
@@ -217,6 +222,147 @@ local function populateInventory()
 
     scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset + marbleFrameSize + 10)
 end
+
+-- Create buttons
+local levelSelectButton = createButton(
+    "LevelSelectButton",
+    "Level Selector",
+    UDim2.new(1, screenWidthOffset, 1, -buttonSpacing)
+)
+
+-- Level Selector UI setup
+local levelSelectFrame = Instance.new("Frame")
+levelSelectFrame.Size = UDim2.new(0.8, 0, 0.8, 0)
+levelSelectFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+levelSelectFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+levelSelectFrame.BorderSizePixel = 0
+levelSelectFrame.Visible = false
+levelSelectFrame.Parent = screenGui
+
+-- Add a scrolling frame for levels
+local levelScrollingFrame = Instance.new("ScrollingFrame")
+levelScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+levelScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+levelScrollingFrame.ScrollBarThickness = 10
+levelScrollingFrame.BackgroundTransparency = 1
+levelScrollingFrame.Parent = levelSelectFrame
+
+-- Add close button to level selector
+local closeLevelButton = Instance.new("TextButton")
+closeLevelButton.Size = UDim2.new(0.05, 0, 0.05, 0)
+closeLevelButton.Position = UDim2.new(0.95, -10, 0, 10)
+closeLevelButton.Text = "X"
+closeLevelButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeLevelButton.TextColor3 = Color3.new(1, 1, 1)
+closeLevelButton.Active = true
+closeLevelButton.Parent = levelSelectFrame
+
+closeLevelButton.MouseButton1Click:Connect(function()
+    levelSelectFrame.Visible = false
+end)
+
+-- Function to populate level selector
+local function populateLevelSelector()
+    levelScrollingFrame:ClearAllChildren()
+
+    local success, inventory = pcall(function()
+        return fetchInventoryFunction:InvokeServer()
+    end)
+
+    if not success then
+        warn("Failed to fetch inventory from server")
+        return
+    end
+
+    local beatenLevels = inventory.beatenLevels or {}
+    print(beatenLevels)
+    local yOffset = 10
+    local buttonHeight = 70
+
+    for _, levelData in ipairs(Levels) do
+        local isCompleted = table.find(beatenLevels, levelData.Location) ~= nil
+
+        local levelFrame = Instance.new("Frame")
+        levelFrame.Size = UDim2.new(0.9, 0, 0, buttonHeight)
+        levelFrame.Position = UDim2.new(0.05, 0, 0, yOffset)
+        levelFrame.BackgroundColor3 = isCompleted and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+        levelFrame.BorderSizePixel = 0
+        levelFrame.Parent = levelScrollingFrame
+
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Size = UDim2.new(0.7, 0, 1, 0)
+        nameLabel.Position = UDim2.new(0, 10, 0, 0)
+        nameLabel.Text = levelData.Name
+        nameLabel.TextColor3 = Color3.new(1, 1, 1)
+        nameLabel.TextScaled = true
+        nameLabel.Font = Enum.Font.SourceSansBold
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Parent = levelFrame
+
+        local descriptionLabel = Instance.new("TextLabel")
+        descriptionLabel.Size = UDim2.new(1, 0, 0.4, 0)
+        descriptionLabel.Position = UDim2.new(0, 0, 0.6, 0)
+        descriptionLabel.Text = levelData.Description
+        descriptionLabel.TextColor3 = Color3.new(1, 1, 1)
+        descriptionLabel.TextScaled = true
+        descriptionLabel.Font = Enum.Font.SourceSans
+        descriptionLabel.BackgroundTransparency = 1
+        descriptionLabel.Parent = levelFrame
+
+        if isCompleted then
+            local replayButton = Instance.new("TextButton")
+            replayButton.Size = UDim2.new(0.2, 0, 0.8, 0)
+            replayButton.Position = UDim2.new(0.8, 0, 0.1, 0)
+            replayButton.Text = "Replay"
+            replayButton.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
+            replayButton.TextColor3 = Color3.new(1, 1, 1)
+            replayButton.TextScaled = true
+            replayButton.Font = Enum.Font.SourceSansBold
+            replayButton.Parent = levelFrame
+
+            replayButton.MouseButton1Click:Connect(function()
+                print("Selected level to replay:", levelData.Name)
+                teleportToLevelEvent:FireServer(levelData.Location)
+                -- Add level replay functionality here
+            end)
+        else
+            local lockedLabel = Instance.new("TextLabel")
+            lockedLabel.Size = UDim2.new(0.2, 0, 0.8, 0)
+            lockedLabel.Position = UDim2.new(0.8, 0, 0.1, 0)
+            lockedLabel.Text = "LOCKED"
+            lockedLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+            lockedLabel.TextScaled = true
+            lockedLabel.Font = Enum.Font.SourceSansBold
+            lockedLabel.BackgroundTransparency = 1
+            lockedLabel.Parent = levelFrame
+        end
+
+        yOffset = yOffset + buttonHeight + 10
+    end
+
+    levelScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+end
+
+
+-- Trigger UI setup initially and on respawn
+player.CharacterAdded:Connect(function()
+    setupUI()
+end)
+
+-- Initial setup
+if player.Character then
+    setupUI()
+end
+
+
+-- Level Selector Button Functionality
+levelSelectButton.MouseButton1Click:Connect(function()
+    levelSelectFrame.Visible = not levelSelectFrame.Visible
+    if levelSelectFrame.Visible then
+        populateLevelSelector()
+    end
+end)
+
 
 -- Inventory Button Functionality
 inventoryButton.MouseButton1Click:Connect(function()

@@ -54,7 +54,7 @@ local function loadPlayerInventory(player)
     }
     
     local success, data = pcall(function()
-        playerInventoryDataStore:RemoveAsync(player.UserId)
+        --playerInventoryDataStore:RemoveAsync(player.UserId)
         return playerInventoryDataStore:GetAsync(player.UserId)
     end)
     
@@ -134,6 +134,27 @@ local function playerOwnsGamepass(player, gamepassId)
 end
 
 
+-- Function to mark a level as beaten and update the inventory
+local function completeLevel(player, levelName)
+    local inventory = playerInventories[player.UserId]
+    if inventory then
+        -- Check if the level is already marked as beaten
+        if not table.find(inventory.beatenLevels, levelName) then
+            table.insert(inventory.beatenLevels, levelName)
+            inventoryUpdateEvent:FireClient(player, "LevelCompleted", levelName)
+            print(player.Name .. " completed level: " .. levelName)
+            printInventory(player)
+            -- Save the updated inventory to the DataStore
+            savePlayerInventory(player)
+        else
+            print(player.Name .. " has already completed level: " .. levelName)
+        end
+    else
+        warn("No inventory found for player: " .. player.Name)
+    end
+end
+
+-- Update the monitorMarble function to handle level completion
 local function monitorMarble(player, character)
     -- Get the main part of the character
     local mainPart = character:FindFirstChild("Part") or character:FindFirstChildWhichIsA("BasePart")
@@ -143,16 +164,9 @@ local function monitorMarble(player, character)
         return
     end
 
-    -- Print monitored part
-    print("Monitoring collisions for:", mainPart.Name)
-
     -- Attach Touched event
     mainPart.Touched:Connect(function(hit)
         if hit then
-            print(player.Name .. " (marble) touched:", hit.Name)
-            print("Touched part parent:", hit.Parent)
-            print("Touched part properties: CanCollide =", hit.CanCollide, ", Anchored =", hit.Anchored)
-
             -- Handle hazard touch
             if hit.Name == "Hazard" then
                 print(player.Name .. " touched a Hazard and will die.")
@@ -163,10 +177,11 @@ local function monitorMarble(player, character)
                 return
             end
             
-            -- Check if the touched part matches any level unlock criteria
+            -- Check if the touched part unlocks a marble
             for _, marbleData in ipairs(Marbles) do
                 if marbleData.LevelUnlocked == hit.Name then
                     unlockMarble(player, marbleData.Name)
+                    completeLevel(player, marbleData.LevelUnlocked)
                     print(player.Name .. " unlocked marble:", marbleData.Name, "by touching:", hit.Name)
                 end
             end
