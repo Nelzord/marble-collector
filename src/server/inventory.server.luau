@@ -52,6 +52,7 @@ local function loadPlayerInventory(player)
     }
     
     local success, data = pcall(function()
+        playerInventoryDataStore:RemoveAsync(player.UserId)
         return playerInventoryDataStore:GetAsync(player.UserId)
     end)
     
@@ -126,20 +127,34 @@ game.Players.PlayerAdded:Connect(function(player)
     -- Load the player's inventory upon joining
     local inventory = loadPlayerInventory(player)
 
+    -- Handle the player's character spawning
     player.CharacterAdded:Connect(function(character)
+        print(player.Name .. "'s character added.")
         -- Ensure the character is fully loaded
-        character:WaitForChild("Part", 10) -- Adjust timeout as needed
+        local success, part = pcall(function()
+            return character:WaitForChild("Part", 10) -- Adjust timeout as needed
+        end)
 
-        -- Start monitoring the character as the marble
-        if character:IsA("Model") then
-            print(player.Name .. "'s character (marble) is ready for monitoring.")
-            monitorMarble(player, character)
+        if success and part then
+            -- Start monitoring the character as the marble
+            if character:IsA("Model") then
+                print(player.Name .. "'s character (marble) is ready for monitoring.")
+                monitorMarble(player, character)
+            else
+                warn("Player's character is not a valid Model:", player.Name)
+            end
         else
-            warn("Player's character is not a valid Model:", player.Name)
+            warn("Character failed to load properly for:", player.Name)
         end
     end)
-end)
 
+    -- Check if the character already exists (for scenarios where CharacterAdded doesn't fire immediately)
+    if player.Character then
+        print(player.Name .. "'s character already exists. Connecting to it.")
+        local character = player.Character
+        monitorMarble(player, character)
+    end
+end)
 
 -- Save inventory when the player leaves
 game.Players.PlayerRemoving:Connect(function(player)
