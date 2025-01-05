@@ -1,6 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStoreService = game:GetService("DataStoreService")
+local MarketplaceService = game:GetService("MarketplaceService")
 local playerInventoryDataStore = DataStoreService:GetDataStore("PlayerInventory")
+
 
 -- Create RemoteEvents for inventory updates
 local inventoryUpdateEvent = Instance.new("RemoteEvent")
@@ -90,6 +92,48 @@ local function unlockMarble(player, marbleName)
     end
 end
 
+-- Function to unlock all marbles for a player
+local function unlockAllMarbles(player)
+    local inventory = playerInventories[player.UserId]
+    if not inventory then
+        warn("No inventory found for player: " .. player.Name)
+        return
+    end
+
+    for _, marbleData in ipairs(Marbles) do
+        if not table.find(inventory.unlockedMarbles, marbleData.Name) then
+            table.insert(inventory.unlockedMarbles, marbleData.Name)
+            inventoryUpdateEvent:FireClient(player, "MarbleUnlocked", marbleData.Name)
+            print(player.Name .. " unlocked marble: " .. marbleData.Name)
+        end
+    end
+
+    -- Save the updated inventory to the DataStore
+    savePlayerInventory(player)
+end
+
+-- Example usage:
+game.Players.PlayerAdded:Connect(function(player)
+    -- Unlock all marbles for the player upon joining (for testing purposes)
+    player.CharacterAdded:Connect(function()
+        unlockAllMarbles(player)
+    end)
+end)
+
+-- Function to check if a player owns a gamepass
+local function playerOwnsGamepass(player, gamepassId)
+    local success, result = pcall(function()
+        return MarketplaceService:UserOwnsGamePassAsync(player.UserId, gamepassId)
+    end)
+    if success then
+        return result
+    else
+        warn("Failed to check gamepass ownership for player: " .. player.Name)
+        return false
+    end
+end
+
+
 local function monitorMarble(player, character)
     -- Get the main part of the character
     local mainPart = character:FindFirstChild("Part") or character:FindFirstChildWhichIsA("BasePart")
@@ -137,6 +181,12 @@ game.Players.PlayerAdded:Connect(function(player)
     -- Load the player's inventory upon joining
     local inventory = loadPlayerInventory(player)
 
+    --  -- Unlock all marbles if the player owns the corresponding gamepass
+    --  if playerOwnsGamepass(player, 1022595197) then
+    --     print(player.Name .. " owns the 'Unlock All Marbles' gamepass.")
+    --     unlockAllMarbles(player)
+    -- end
+    
     -- Handle the player's character spawning
     player.CharacterAdded:Connect(function(character)
         print(player.Name .. "'s character added.")
