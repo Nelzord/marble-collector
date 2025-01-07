@@ -176,6 +176,15 @@ local function monitorMarble(player, character)
                 end
                 return
             end
+
+            if hit.Name == "HazardStatic" then
+                print(player.Name .. " touched a Hazard and will die.")
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.Health = 0 -- Kills the player
+                end
+                return
+            end
             
             -- Check if the touched part unlocks a marble
             for _, marbleData in ipairs(Marbles) do

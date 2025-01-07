@@ -3,7 +3,7 @@ return {
     {
         LevelUnlocked = "X",
         Name = "Default Marble",
-        Color = Color3.fromRGB(50, 50, 50),
+        Color = Color3.fromRGB(0, 0, 0),
         Description = "Just your ordinary marble"
     },
     {
@@ -23,6 +23,12 @@ return {
         Name = "Green Gravity",
         Color = Color3.fromRGB(0, 255, 0),
         Description = "This marble is speedy"
+    },
+    {
+        LevelUnlocked = "Level4Plate",
+        Name = "Ice",
+        Color = Color3.fromRGB(123, 205, 221),
+        Description = "This marble is ice"
     }
     
 }

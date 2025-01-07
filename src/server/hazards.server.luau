@@ -44,5 +44,8 @@ RunService.Stepped:Connect(function(_, deltaTime)
         if descendant.Name == "Hazard" and descendant:IsA("BasePart") then
             spinObject(descendant, deltaTime) -- Spin the hazard part
         end
+        if descendant.Name == "SpinPart" and descendant:IsA("BasePart") then
+            spinObject(descendant, deltaTime) -- Spin the hazard part
+        end
     end
 end)
