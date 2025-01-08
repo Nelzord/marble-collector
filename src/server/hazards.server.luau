@@ -35,6 +35,16 @@ local function spinObject(object, deltaTime)
     end
 end
 
+-- Function to spin a part
+local function rotateObject(object, deltaTime)
+    if object:IsA("BasePart") then
+        -- Calculate the rotation increment
+        local increment = CFrame.Angles(math.rad(45 * deltaTime), 0, 0) -- Adjust rotation speed as needed
+        object.CFrame = object.CFrame * increment
+        -- print("Spinning:", object.Name)
+    end
+end
+
 -- Connect to RunService.Stepped for smooth rotation
 RunService.Stepped:Connect(function(_, deltaTime)
     -- Get all descendants in Workspace
@@ -46,6 +56,9 @@ RunService.Stepped:Connect(function(_, deltaTime)
         end
         if descendant.Name == "SpinPart" and descendant:IsA("BasePart") then
             spinObject(descendant, deltaTime) -- Spin the hazard part
+        end
+        if descendant.Name == "HazardRotate" and descendant:IsA("BasePart") then
+            rotateObject(descendant, deltaTime) -- Spin the hazard part
         end
     end
 end)

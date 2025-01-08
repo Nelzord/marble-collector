@@ -177,7 +177,7 @@ local function monitorMarble(player, character)
                 return
             end
 
-            if hit.Name == "HazardStatic" then
+            if hit.Name == "HazardStatic" or hit.Name == "HazardRotate" then
                 print(player.Name .. " touched a Hazard and will die.")
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
