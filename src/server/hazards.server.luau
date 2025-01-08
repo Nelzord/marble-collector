@@ -45,6 +45,18 @@ local function rotateObject(object, deltaTime)
     end
 end
 
+-- Function to move a part up and down slightly
+local function vibrateObject(object, deltaTime, amplitude, frequency)
+    if object:IsA("BasePart") then
+        -- Calculate the vertical offset using sine wave
+        local offset = math.sin(tick() * frequency) * amplitude
+        
+        -- Adjust the object's position
+        local position = object.Position
+        object.Position = Vector3.new(position.X, position.Y + offset * deltaTime, position.Z)
+    end
+end
+
 -- Connect to RunService.Stepped for smooth rotation
 RunService.Stepped:Connect(function(_, deltaTime)
     -- Get all descendants in Workspace
@@ -59,6 +71,9 @@ RunService.Stepped:Connect(function(_, deltaTime)
         end
         if descendant.Name == "HazardRotate" and descendant:IsA("BasePart") then
             rotateObject(descendant, deltaTime) -- Spin the hazard part
+        end
+        if descendant.Name == "VibrateObj" and descendant:IsA("BasePart") then
+            vibrateObject(descendant, 0.016, 10, 5)
         end
     end
 end)
