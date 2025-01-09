@@ -69,11 +69,17 @@ RunService.Stepped:Connect(function(_, deltaTime)
         if descendant.Name == "SpinPart" and descendant:IsA("BasePart") then
             spinObject(descendant, deltaTime) -- Spin the hazard part
         end
+        if descendant.Name == "SpinPartFaster" and descendant:IsA("BasePart") then
+            spinObject(descendant, deltaTime*3) -- Spin the hazard part
+        end
         if descendant.Name == "HazardRotate" and descendant:IsA("BasePart") then
             rotateObject(descendant, deltaTime) -- Spin the hazard part
         end
         if descendant.Name == "VibrateObj" and descendant:IsA("BasePart") then
             vibrateObject(descendant, 0.016, 10, 5)
+        end
+        if descendant.Name == "DropHazard" and descendant:IsA("BasePart") then
+            vibrateObject(descendant, 0.016, 100, 2)
         end
     end
 end)

@@ -22,7 +22,7 @@ game.Players.PlayerAdded:Connect(function(player)
         local marble = Instance.new("Part")
         marble.Size = Vector3.new(8, 8, 8)
         marble.BrickColor = BrickColor.Black()
-        marble.Transparency = 0.5
+        marble.Transparency = 0
         marble.Shape = Enum.PartType.Ball
         marble.Material = Enum.Material.SmoothPlastic
         marble.Parent = char

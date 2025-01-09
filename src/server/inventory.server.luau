@@ -168,7 +168,7 @@ local function monitorMarble(player, character)
     mainPart.Touched:Connect(function(hit)
         if hit then
             -- Handle hazard touch
-            if hit.Name == "Hazard" then
+            if hit.Name.find(hit.Name, "Hazard") then
                 print(player.Name .. " touched a Hazard and will die.")
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
