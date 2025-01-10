@@ -10,8 +10,9 @@ local Levels = require(ReplicatedStorage.Shared.Levels)
 
 -- Fetch Remote Functions and Events
 local fetchInventoryFunction = ReplicatedStorage:WaitForChild("FetchInventoryFunction")
-local marbleColorChangeEvent = ReplicatedStorage:WaitForChild("MarbleColorChangeEvent")
 local teleportToLevelEvent = ReplicatedStorage:WaitForChild("TeleportToLevelEvent")
+local openMarbleShop = ReplicatedStorage:WaitForChild("OpenMarbleShop")
+
 
 -- Function to create a rotating marble
 local function createRotatingMarble(viewportFrame, color)
@@ -33,7 +34,6 @@ local function createRotatingMarble(viewportFrame, color)
     end)
 end
 
--- Function to populate the inventory UI
 local function populateInventory(scrollingFrame, tooltip)
     scrollingFrame:ClearAllChildren()
     tooltip.Visible = false
@@ -49,18 +49,26 @@ local function populateInventory(scrollingFrame, tooltip)
 
     local unlockedMarbles = inventory.unlockedMarbles or {}
     local xOffset, yOffset = 10, 10
-    local rowCount = 0
-    local marbleFrameSize = 150
+    local marbleFrameSize = (scrollingFrame.AbsoluteSize.X - 50) / 4 -- Dynamically adjust size
+    local columns = math.floor(scrollingFrame.AbsoluteSize.X / marbleFrameSize) -- Calculate columns
 
     for _, marbleData in ipairs(Marbles) do
         local isUnlocked = table.find(unlockedMarbles, marbleData.Name) ~= nil
 
+        -- Create marble frame
         local marbleFrame = Instance.new("Frame")
         marbleFrame.Size = UDim2.new(0, marbleFrameSize, 0, marbleFrameSize)
         marbleFrame.Position = UDim2.new(0, xOffset, 0, yOffset)
-        marbleFrame.BackgroundTransparency = 1
+        marbleFrame.BackgroundTransparency = 0.2
+        marbleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Neutral gray
         marbleFrame.Parent = scrollingFrame
 
+        -- Add rounded corners to marble frame
+        local frameCorner = Instance.new("UICorner")
+        frameCorner.CornerRadius = UDim.new(0.1, 0)
+        frameCorner.Parent = marbleFrame
+
+        -- Create viewport frame for rotating marble
         local viewportFrame = Instance.new("ViewportFrame")
         viewportFrame.Size = UDim2.new(1, 0, 0.7, 0)
         viewportFrame.BackgroundTransparency = 1
@@ -68,22 +76,25 @@ local function populateInventory(scrollingFrame, tooltip)
 
         createRotatingMarble(viewportFrame, marbleData.Color)
 
+        -- Create name label
         local nameLabel = Instance.new("TextLabel")
         nameLabel.Size = UDim2.new(1, 0, 0.3, 0)
         nameLabel.Position = UDim2.new(0, 0, 0.7, 0)
         nameLabel.Text = marbleData.Name
         nameLabel.BackgroundTransparency = 1
-        nameLabel.TextColor3 = Color3.new(1, 1, 1)
+        nameLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
         nameLabel.TextScaled = true
-        nameLabel.Font = Enum.Font.SourceSansBold
+        nameLabel.Font = Enum.Font.GothamBold -- Clean font
         nameLabel.Parent = marbleFrame
 
         if isUnlocked then
+            -- Create a clickable button over the marble
             local clickButton = Instance.new("TextButton")
             clickButton.Size = UDim2.new(1, 0, 1, 0)
             clickButton.BackgroundTransparency = 1
             clickButton.Parent = marbleFrame
 
+            -- Tooltip for unlocked marble
             clickButton.MouseEnter:Connect(function()
                 tooltip.Text = marbleData.Description
                 tooltip.Visible = true
@@ -93,36 +104,43 @@ local function populateInventory(scrollingFrame, tooltip)
             end)
             clickButton.MouseButton1Click:Connect(function()
                 print("Selected marble:", marbleData.Name)
-                marbleColorChangeEvent:FireServer(marbleData.Color)
             end)
         else
+            -- Locked banner for locked marbles
             local lockedBanner = Instance.new("TextLabel")
             lockedBanner.Size = UDim2.new(1, 0, 0.3, 0)
             lockedBanner.Position = UDim2.new(0, 0, 0.35, 0)
             lockedBanner.Text = "LOCKED"
-            lockedBanner.BackgroundTransparency = 0.5
-            lockedBanner.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            lockedBanner.TextColor3 = Color3.fromRGB(255, 0, 0)
+            lockedBanner.BackgroundTransparency = 0.2
+            lockedBanner.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+            lockedBanner.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red text
             lockedBanner.TextScaled = true
-            lockedBanner.Font = Enum.Font.SourceSansBold
+            lockedBanner.Font = Enum.Font.GothamBold
             lockedBanner.Parent = marbleFrame
+
+            -- Add rounded corners to locked banner
+            local bannerCorner = Instance.new("UICorner")
+            bannerCorner.CornerRadius = UDim.new(0.1, 0)
+            bannerCorner.Parent = lockedBanner
         end
 
+        -- Adjust position for the next marble
         xOffset = xOffset + marbleFrameSize + 10
-        rowCount = rowCount + 1
-        if rowCount == 4 then
-            rowCount = 0
+        if xOffset + marbleFrameSize > scrollingFrame.AbsoluteSize.X then
             xOffset = 10
             yOffset = yOffset + marbleFrameSize + 10
         end
     end
 
+    -- Update the canvas size of the scrolling frame to fit all items
     scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset + marbleFrameSize + 10)
 end
 
 local function populateLevelSelector(levelScrollingFrame)
+    -- Clear existing children
     levelScrollingFrame:ClearAllChildren()
 
+    -- Fetch inventory data from the server
     local success, inventory = pcall(function()
         return fetchInventoryFunction:InvokeServer()
     end)
@@ -139,53 +157,69 @@ local function populateLevelSelector(levelScrollingFrame)
     for _, levelData in ipairs(Levels) do
         local isCompleted = table.find(beatenLevels, levelData.Location) ~= nil
 
+        -- Create the frame for the level
         local levelFrame = Instance.new("Frame")
         levelFrame.Size = UDim2.new(0.9, 0, 0, buttonHeight)
         levelFrame.Position = UDim2.new(0.05, 0, 0, yOffset)
-        levelFrame.BackgroundColor3 = isCompleted and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+        levelFrame.BackgroundColor3 = isCompleted and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50) -- Green for completed, red for locked
         levelFrame.BorderSizePixel = 0
         levelFrame.Parent = levelScrollingFrame
 
+        -- Add rounded corners to the frame
+        local frameCorner = Instance.new("UICorner")
+        frameCorner.CornerRadius = UDim.new(0.15, 0)
+        frameCorner.Parent = levelFrame
+
+        -- Add the name label
         local nameLabel = Instance.new("TextLabel")
-        nameLabel.Size = UDim2.new(0.7, 0, 1, 0)
-        nameLabel.Position = UDim2.new(0, 10, 0, 0)
+        nameLabel.Size = UDim2.new(0.7, -10, 1, 0) -- Leave space for buttons
+        nameLabel.Position = UDim2.new(0, 10, 0, 0) -- Slightly offset from the left
         nameLabel.Text = levelData.Name
-        nameLabel.TextColor3 = Color3.new(1, 1, 1)
         nameLabel.TextScaled = true
-        nameLabel.Font = Enum.Font.SourceSansBold
+        nameLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+        nameLabel.Font = Enum.Font.GothamBold -- Clean font
         nameLabel.BackgroundTransparency = 1
         nameLabel.Parent = levelFrame
 
+        -- Add interaction button (Replay or Locked)
         if isCompleted then
             local replayButton = Instance.new("TextButton")
-            replayButton.Size = UDim2.new(0.2, 0, 1, 0)
-            replayButton.Position = UDim2.new(0.8, 0, 0, 0)
+            replayButton.Size = UDim2.new(0.25, 0, 0.8, 0) -- Adjust size for cleaner alignment
+            replayButton.Position = UDim2.new(0.75, 0, 0.1, 0) -- Slightly inset
             replayButton.Text = "Replay"
             replayButton.TextScaled = true
-            replayButton.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
-            replayButton.TextColor3 = Color3.new(1, 1, 1)
-            replayButton.Font = Enum.Font.SourceSansBold
+            replayButton.BackgroundColor3 = Color3.fromRGB(50, 50, 200) -- Blue button
+            replayButton.TextColor3 = Color3.new(1, 1, 1) -- White text
+            replayButton.Font = Enum.Font.GothamBold
             replayButton.Parent = levelFrame
 
+            -- Add rounded corners to the button
+            local buttonCorner = Instance.new("UICorner")
+            buttonCorner.CornerRadius = UDim.new(0.15, 0)
+            buttonCorner.Parent = replayButton
+
+            -- Connect the button to replay the level
             replayButton.MouseButton1Click:Connect(function()
                 print("Loading level:", levelData.Name)
                 teleportToLevelEvent:FireServer(levelData.Location)
             end)
         else
             local lockedLabel = Instance.new("TextLabel")
-            lockedLabel.Size = UDim2.new(0.2, 0, 1, 0)
-            lockedLabel.Position = UDim2.new(0.8, 0, 0, 0)
+            lockedLabel.Size = UDim2.new(0.25, 0, 0.8, 0) -- Adjust size for cleaner alignment
+            lockedLabel.Position = UDim2.new(0.75, 0, 0.1, 0) -- Slightly inset
             lockedLabel.Text = "LOCKED"
             lockedLabel.TextScaled = true
-            lockedLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-            lockedLabel.Font = Enum.Font.SourceSansBold
+            lockedLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red text
+            lockedLabel.Font = Enum.Font.GothamBold
             lockedLabel.BackgroundTransparency = 1
             lockedLabel.Parent = levelFrame
         end
 
+        -- Update yOffset for the next level
         yOffset = yOffset + buttonHeight + 10
     end
 
+    -- Update scrolling frame canvas size to fit all levels
     levelScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
 
@@ -271,37 +305,52 @@ local function setupUI()
         levelSelectFrame.Visible = false
     end)
 
-    -- Buttons
-    local function createButton(name, text, position, clickFunction)
-        local button = Instance.new("TextButton")
-        button.Name = name
-        button.Text = text
-        button.Size = UDim2.new(0, 150, 0, 50)
-        button.Position = position
-        button.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
-        button.TextColor3 = Color3.new(1, 1, 1)
-        button.TextScaled = true
-        button.Font = Enum.Font.SourceSansBold
-        button.Parent = screenGui
-        button.MouseButton1Click:Connect(clickFunction)
-        return button
-    end
+    -- Function to create a button with rounded edges and clean UI
+local function createButton(name, text, position, parent, clickFunction)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Text = text
+    button.Size = UDim2.new(0, 150, 0, 50) -- Button size
+    button.Position = position -- Button position
+    button.BackgroundColor3 = Color3.fromRGB(50, 150, 250) -- Light blue background
+    button.TextColor3 = Color3.new(1, 1, 1) -- White text
+    button.TextScaled = true
+    button.Font = Enum.Font.GothamBold -- Clean font
+    button.Parent = parent
+
+    -- Add rounded corners
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0.2, 0) -- Rounded corner radius (adjust as needed)
+    corner.Parent = button
+
+    -- Add hover effect
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(70, 170, 255) -- Slightly lighter on hover
+    end)
+
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(50, 150, 250) -- Revert to original color
+    end)
+
+    -- Connect button click function
+    button.MouseButton1Click:Connect(clickFunction)
+
+    return button
+end
 
     local screenWidthOffset = -160
     local buttonSpacing = 60
 
-    createButton("InventoryButton", "Inventory", UDim2.new(1, screenWidthOffset, 1, -buttonSpacing * 3), function()
+    createButton("InventoryButton", "Inventory", UDim2.new(1, screenWidthOffset, 1, -buttonSpacing * 3), screenGui, function()
         inventoryFrame.Visible = not inventoryFrame.Visible
         if inventoryFrame.Visible then
             populateInventory(scrollingFrame, tooltip)
         end
     end)
 
-    createButton("ShopButton", "Shop", UDim2.new(1, screenWidthOffset, 1, -buttonSpacing * 2), function()
-        print("Shop button clicked! Implement shop functionality here.")
-    end)
+    
 
-    createButton("LevelSelectButton", "Level Selector", UDim2.new(1, screenWidthOffset, 1, -buttonSpacing), function()
+    createButton("LevelSelectButton", "Level Selector", UDim2.new(1, screenWidthOffset, 1, -buttonSpacing), screenGui, function()
         levelSelectFrame.Visible = not levelSelectFrame.Visible
         if levelSelectFrame.Visible then
             populateLevelSelector(levelScrollingFrame)

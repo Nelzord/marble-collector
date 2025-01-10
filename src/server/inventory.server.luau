@@ -54,7 +54,7 @@ local function loadPlayerInventory(player)
     }
     
     local success, data = pcall(function()
-        --playerInventoryDataStore:RemoveAsync(player.UserId)
+        playerInventoryDataStore:RemoveAsync(player.UserId)
         return playerInventoryDataStore:GetAsync(player.UserId)
     end)
     
@@ -116,7 +116,7 @@ end
 game.Players.PlayerAdded:Connect(function(player)
     -- Unlock all marbles for the player upon joining (for testing purposes)
     player.CharacterAdded:Connect(function()
-        unlockAllMarbles(player)
+        -- unlockAllMarbles(player)
     end)
 end)
 
@@ -189,7 +189,6 @@ local function monitorMarble(player, character)
             -- Check if the touched part unlocks a marble
             for _, marbleData in ipairs(Marbles) do
                 if marbleData.LevelUnlocked == hit.Name then
-                    unlockMarble(player, marbleData.Name)
                     completeLevel(player, marbleData.LevelUnlocked)
                     print(player.Name .. " unlocked marble:", marbleData.Name, "by touching:", hit.Name)
                 end
@@ -209,7 +208,7 @@ game.Players.PlayerAdded:Connect(function(player)
     --  if playerOwnsGamepass(player, 1022595197) then
     --     print(player.Name .. " owns the 'Unlock All Marbles' gamepass.")
     --     unlockAllMarbles(player)
-    -- end
+    -- endd
     
     -- Handle the player's character spawning
     player.CharacterAdded:Connect(function(character)

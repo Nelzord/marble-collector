@@ -33,8 +33,7 @@ local function createGamepassGui()
         local button = Instance.new("TextButton")
         button.Size = UDim2.new(0, 60, 0, 60) -- Circular buttons (Width = Height)
         button.Position = UDim2.new(0.5, 0, (#gamepassFrame:GetChildren() - 1) * 0.2, 0) -- Space buttons vertically
-        button.BackgroundColor3 = Color3.fromRGB(50, 50, 200) -- Blue color
-        button.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+        button.BackgroundColor3 = Color3.fromRGB(255,255, 255) -- White text
         button.Font = Enum.Font.SourceSansBold
         button.TextSize = 14
         button.Text = gamepass.Name
