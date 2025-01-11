@@ -13,6 +13,18 @@ local fetchInventoryFunction = Instance.new("RemoteFunction")
 fetchInventoryFunction.Name = "FetchInventoryFunction"
 fetchInventoryFunction.Parent = ReplicatedStorage
 
+-- Add this near your other RemoteEvent creations
+local unlockMarbleEvent = Instance.new("RemoteEvent")
+unlockMarbleEvent.Name = "UnlockMarbleEvent"
+unlockMarbleEvent.Parent = ReplicatedStorage
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local deathSoundEvent = Instance.new("RemoteEvent")
+deathSoundEvent.Name = "DeathSoundEvent"
+deathSoundEvent.Parent = ReplicatedStorage
+
+
+
 local playerInventories = {} -- Store player inventories in memory
 
 -- Load Marbles Data
@@ -172,6 +184,7 @@ local function monitorMarble(player, character)
                 print(player.Name .. " touched a Hazard and will die.")
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
+                    deathSoundEvent:FireClient(player)
                     humanoid.Health = 0 -- Kills the player
                 end
                 return
@@ -236,6 +249,16 @@ game.Players.PlayerAdded:Connect(function(player)
         print(player.Name .. "'s character already exists. Connecting to it.")
         local character = player.Character
         monitorMarble(player, character)
+    end
+end)
+
+-- Add this to the server script
+unlockMarbleEvent.OnServerEvent:Connect(function(player, marbleName)
+    -- Validate input from the client
+    if typeof(marbleName) == "string" then
+        unlockMarble(player, marbleName)
+    else
+        warn("Invalid marble name received from player:", player.Name)
     end
 end)
 

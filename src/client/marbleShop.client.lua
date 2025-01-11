@@ -9,7 +9,7 @@ local remoteEvent = replicatedStorage:WaitForChild("OpenMarbleShop")
 local basicRollEvent = replicatedStorage:WaitForChild("BasicRollEvent")
 local rareRollEvent = replicatedStorage:WaitForChild("RareRollEvent")
 local legendaryRollEvent = replicatedStorage:WaitForChild("LegendaryRollEvent")
-
+local unlockMarbleEvent = replicatedStorage:WaitForChild("UnlockMarbleEvent")
 
 -- Shop GUI instance
 local marbleShopGui
@@ -143,14 +143,17 @@ end
 -- Listen for results from the server
 basicRollEvent.OnClientEvent:Connect(function(result)
     print("You rolled: " .. result.Name)
+    unlockMarbleEvent:FireServer(result.Name)
 end)
 
 rareRollEvent.OnClientEvent:Connect(function(result)
     print("You rolled: " .. result.Name)
+    unlockMarbleEvent:FireServer(result.Name)
 end)
 
 legendaryRollEvent.OnClientEvent:Connect(function(result)
     print("You rolled: " .. result.Name)
+    unlockMarbleEvent:FireServer(result.Name)
 end)
 
 -- Initialize the shop button and UI
