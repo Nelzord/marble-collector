@@ -223,7 +223,8 @@ return {
         Color = Color3.fromRGB(255, 20, 147),
         Description = "Whispers secrets of ancient marbles.",
         StatExplanation = "Greatly increases roll stability.",
-        LevelUnlocked = "Level27Plate"
+        LevelUnlocked = "Level27Plate",
+        TextureId = "rbxassetid://128699260154014"
     },
 
     -- Transcendent Marble

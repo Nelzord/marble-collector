@@ -6,12 +6,50 @@ local remoteEvent = Instance.new("RemoteEvent")
 remoteEvent.Name = "JumpRequestEvent"
 remoteEvent.Parent = ReplicatedStorage
 
-local marbleColorChangeEvent = Instance.new("RemoteEvent")
-marbleColorChangeEvent.Name = "MarbleColorChangeEvent"
-marbleColorChangeEvent.Parent = ReplicatedStorage
+local marbleTextureChangeEvent = Instance.new("RemoteEvent")
+marbleTextureChangeEvent.Name = "MarbleTextureChangeEvent"
+marbleTextureChangeEvent.Parent = ReplicatedStorage
 
 -- Set workspace gravity to Earth's gravity
 workspace.Gravity = 1000-- Adjusted to Earth's gravity (9.81 m/s² scaled to Roblox's system)
+
+
+local function changeMarbleTexture(marble, textureId)
+    -- Validate input
+    if not textureId then
+        warn("No TextureId provided for the marble object.")
+        return
+    end
+
+    -- Remove existing Decals
+    for _, child in ipairs(marble:GetChildren()) do
+        if child:IsA("Decal") then
+            child:Destroy()
+        end
+    end
+
+    -- Apply decals to all sides of the marble
+    for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+        local decal = Instance.new("Decal")
+        decal.Texture = textureId -- Use the provided TextureId
+        decal.Face = face -- Apply to each face
+        decal.Parent = marble
+    end
+
+    print("Applied texture to marble using Decals with TextureId:", textureId)
+end
+
+marbleTextureChangeEvent.OnServerEvent:Connect(function(player, textureId)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local marble = character:FindFirstChild("Marble") -- Replace with your marble object name
+
+    if marble then
+        changeMarbleTexture(marble, textureId) -- Call the texture change function
+        print(player.Name .. " changed their marble's texture to:", textureId)
+    else
+        warn("Marble object not found for player:", player.Name)
+    end
+end)
 
 game.Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(char)
@@ -20,6 +58,7 @@ game.Players.PlayerAdded:Connect(function(player)
 
         -- Create the marble
         local marble = Instance.new("Part")
+        marble.Name = "Marble"
         marble.Size = Vector3.new(8, 8, 8)
         marble.BrickColor = BrickColor.Black()
         marble.Transparency = 0
@@ -57,13 +96,6 @@ game.Players.PlayerAdded:Connect(function(player)
         -- Set the character to PlatformStand to prevent walking
         Hum.PlatformStand = true
 
-        -- Handle marble color change
-        marbleColorChangeEvent.OnServerEvent:Connect(function(plr, selectedColor)
-            if plr == player then
-                marble.Color = selectedColor
-                print(plr.Name .. " changed their marble to color:", tostring(selectedColor))
-            end
-        end)
 
         -- Handle movement
         game:GetService("RunService").Heartbeat:Connect(function()
@@ -150,6 +182,9 @@ local function teleportPlayerToLevel(player, levelLocation)
         warn("Level object not found or is not a BasePart: " .. tostring(levelLocation))
     end
 end
+
+
+
 
 
 -- Connect the RemoteEvent

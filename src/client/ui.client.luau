@@ -12,6 +12,7 @@ local Levels = require(ReplicatedStorage.Shared.Levels)
 local fetchInventoryFunction = ReplicatedStorage:WaitForChild("FetchInventoryFunction")
 local teleportToLevelEvent = ReplicatedStorage:WaitForChild("TeleportToLevelEvent")
 local openMarbleShop = ReplicatedStorage:WaitForChild("OpenMarbleShop")
+local marbleTextureChangeEvent = ReplicatedStorage:WaitForChild("MarbleTextureChangeEvent")
 
 
 -- Function to create a rotating marble
@@ -103,6 +104,12 @@ local function populateInventory(scrollingFrame, tooltip)
                 tooltip.Visible = false
             end)
             clickButton.MouseButton1Click:Connect(function()
+                if marbleData.TextureId then
+                    marbleTextureChangeEvent:FireServer(marbleData.TextureId) -- Send only the TextureId
+                    print("Selected marble:", marbleData.Name)
+                else
+                    warn("No TextureId for selected marble:", marbleData.Name)
+                end
                 print("Selected marble:", marbleData.Name)
             end)
         else

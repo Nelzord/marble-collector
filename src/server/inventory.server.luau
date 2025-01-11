@@ -166,89 +166,71 @@ local function completeLevel(player, levelName)
     end
 end
 
--- Update the monitorMarble function to handle level completion
 local function monitorMarble(player, character)
-    -- Get the main part of the character
-    local mainPart = character:FindFirstChild("Part") or character:FindFirstChildWhichIsA("BasePart")
+    -- Find the marble part in the character
+    local marble = character:FindFirstChild("Marble") or character:FindFirstChildWhichIsA("BasePart")
 
-    if not mainPart then
-        warn("Main part not found for player:", player.Name)
+    if not marble then
+        warn("Marble or main part not found for player:", player.Name)
         return
     end
 
-    -- Attach Touched event
-    mainPart.Touched:Connect(function(hit)
-        if hit then
-            -- Handle hazard touch
-            if hit.Name.find(hit.Name, "Hazard") then
+    print("Monitoring marble for player:", player.Name)
+
+    -- Attach the Touched event to the marble
+    marble.Touched:Connect(function(hit)
+        if hit and hit:IsA("BasePart") then
+            print("Touched part:", hit.Name)
+
+            -- Check if the touched part is a hazard
+            if string.find(hit.Name, "Hazard") then
                 print(player.Name .. " touched a Hazard and will die.")
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
                     deathSoundEvent:FireClient(player)
-                    humanoid.Health = 0 -- Kills the player
+                    humanoid.Health = 0
                 end
-                return
-            end
-
-            if hit.Name == "HazardStatic" or hit.Name == "HazardRotate" then
-                print(player.Name .. " touched a Hazard and will die.")
+            elseif hit.Name == "HazardStatic" or hit.Name == "HazardRotate" then
+                print(player.Name .. " touched a specific Hazard and will die.")
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
-                    humanoid.Health = 0 -- Kills the player
-                end
-                return
-            end
-            
-            -- Check if the touched part unlocks a marble
-            for _, marbleData in ipairs(Marbles) do
-                if marbleData.LevelUnlocked == hit.Name then
-                    completeLevel(player, marbleData.LevelUnlocked)
-                    print(player.Name .. " unlocked marble:", marbleData.Name, "by touching:", hit.Name)
+                    humanoid.Health = 0
                 end
             end
         else
-            print("No part detected on touch event for", player.Name)
+            print("Invalid part touched by:", player.Name)
         end
     end)
 end
+
 
 
 game.Players.PlayerAdded:Connect(function(player)
     -- Load the player's inventory upon joining
     local inventory = loadPlayerInventory(player)
 
-    --  -- Unlock all marbles if the player owns the corresponding gamepass
-    --  if playerOwnsGamepass(player, 1022595197) then
-    --     print(player.Name .. " owns the 'Unlock All Marbles' gamepass.")
-    --     unlockAllMarbles(player)
-    -- endd
-    
-    -- Handle the player's character spawning
     player.CharacterAdded:Connect(function(character)
         print(player.Name .. "'s character added.")
+
         -- Ensure the character is fully loaded
         local success, part = pcall(function()
-            return character:WaitForChild("Part", 10) -- Adjust timeout as needed
+            return character:WaitForChild("Marble", 10) -- Adjust timeout as needed
         end)
 
         if success and part then
+            print(player.Name .. "'s character is ready for monitoring.")
+
             -- Start monitoring the character as the marble
-            if character:IsA("Model") then
-                print(player.Name .. "'s character (marble) is ready for monitoring.")
-                monitorMarble(player, character)
-            else
-                warn("Player's character is not a valid Model:", player.Name)
-            end
+            monitorMarble(player, character)
         else
             warn("Character failed to load properly for:", player.Name)
         end
     end)
 
-    -- Check if the character already exists (for scenarios where CharacterAdded doesn't fire immediately)
+    -- Handle cases where the character already exists (e.g., rejoining quickly)
     if player.Character then
         print(player.Name .. "'s character already exists. Connecting to it.")
-        local character = player.Character
-        monitorMarble(player, character)
+        monitorMarble(player, player.Character)
     end
 end)
 
