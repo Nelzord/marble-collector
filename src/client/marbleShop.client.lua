@@ -5,10 +5,16 @@ local playerGui = player:WaitForChild("PlayerGui")
 -- Remote event to toggle the shop UI
 local remoteEvent = replicatedStorage:WaitForChild("OpenMarbleShop")
 
+-- Access RemoteEvents
+local basicRollEvent = replicatedStorage:WaitForChild("BasicRollEvent")
+local rareRollEvent = replicatedStorage:WaitForChild("RareRollEvent")
+local legendaryRollEvent = replicatedStorage:WaitForChild("LegendaryRollEvent")
+
+
 -- Shop GUI instance
 local marbleShopGui
 
--- Function to create the UI
+-- Function to create the shop UI
 local function createShopUI()
     if marbleShopGui then return end -- Avoid creating it multiple times
 
@@ -16,6 +22,7 @@ local function createShopUI()
     marbleShopGui = Instance.new("ScreenGui")
     marbleShopGui.Name = "MarbleShopGui"
     marbleShopGui.Enabled = false
+    marbleShopGui.ResetOnSpawn = false -- Prevent reset on respawn
     marbleShopGui.Parent = playerGui
 
     -- Create the main frame for the shop
@@ -46,7 +53,7 @@ local function createShopUI()
 
         -- Add rounded corners
         local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0.15, 0) -- Rounded corner radius (adjust as needed)
+        corner.CornerRadius = UDim.new(0.15, 0) -- Rounded corner radius
         corner.Parent = button
 
         -- Add hover effect
@@ -69,25 +76,33 @@ local function createShopUI()
         marbleShopGui.Enabled = false
     end)
 
-    -- Create buttons for the shop
+        -- Create buttons for the shop
     createButton("BasicRollButton", "Basic Marble Roll", UDim2.new(0.1, 0, 0.2, 0), UDim2.new(0.8, 0, 0.15, 0), frame, function()
-        print("Basic Marble Roll")
-        -- Add logic for Basic Marble Roll here
+        print("Requesting Basic Marble Roll")
+        basicRollEvent:FireServer()
     end)
 
     createButton("RareRollButton", "Rare Marble Roll", UDim2.new(0.1, 0, 0.4, 0), UDim2.new(0.8, 0, 0.15, 0), frame, function()
-        print("Rare Marble Roll")
-        -- Add logic for Rare Marble Roll here
+        print("Requesting Rare Marble Roll")
+        rareRollEvent:FireServer()
     end)
 
     createButton("LegendaryRollButton", "Legendary Marble Roll", UDim2.new(0.1, 0, 0.6, 0), UDim2.new(0.8, 0, 0.15, 0), frame, function()
-        print("Legendary Marble Roll")
-        -- Add logic for Legendary Marble Roll here
+        print("Requesting Legendary Marble Roll")
+        legendaryRollEvent:FireServer()
     end)
+
+end
+
+-- Function to create the shop button GUI
+local function createShopButton()
+    -- Check if the shop button already exists
+    if playerGui:FindFirstChild("ShopButtonGui") then return end
 
     -- Create a main UI ScreenGui for the shop button
     local shopButtonGui = Instance.new("ScreenGui")
     shopButtonGui.Name = "ShopButtonGui"
+    shopButtonGui.ResetOnSpawn = false -- Prevent reset on respawn
     shopButtonGui.Parent = playerGui
 
     -- Create a shop button to toggle the shop UI
@@ -118,12 +133,34 @@ local function createShopUI()
 
     -- Toggle the shop UI when the shop button is clicked
     shopButton.MouseButton1Click:Connect(function()
+        if not marbleShopGui then
+            createShopUI()
+        end
         marbleShopGui.Enabled = not marbleShopGui.Enabled
     end)
 end
 
--- Create the UI if it doesn't already exist
+-- Listen for results from the server
+basicRollEvent.OnClientEvent:Connect(function(result)
+    print("You rolled: " .. result.Name)
+end)
+
+rareRollEvent.OnClientEvent:Connect(function(result)
+    print("You rolled: " .. result.Name)
+end)
+
+legendaryRollEvent.OnClientEvent:Connect(function(result)
+    print("You rolled: " .. result.Name)
+end)
+
+-- Initialize the shop button and UI
+createShopButton()
 createShopUI()
+
+-- Ensure shop button persists after player respawns
+player.CharacterAdded:Connect(function()
+    createShopButton() -- Recreate the button if necessary
+end)
 
 -- Toggle the shop UI when the remote event is fired
 remoteEvent.OnClientEvent:Connect(function()

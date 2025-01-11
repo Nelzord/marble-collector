@@ -1,129 +1,210 @@
 -- src/shared/Marbles.lua
 return {
+    -- Common Marbles
     {
-        LevelUnlocked = "X",
+        Rarity = "Common",
         Name = "Default Marble",
         Color = Color3.fromRGB(0, 0, 0),
-        Description = "Just your ordinary marble"
+        Description = "Just your ordinary marble. It's as exciting as plain toast.",
+        StatExplanation = "No special stats. It's just a marble."
     },
     {
-        LevelUnlocked = "Level1Plate",
+        Rarity = "Common",
         Name = "Speedy Red",
         Color = Color3.fromRGB(255, 0, 0),
-        Description = "A marble built for speed."
+        Description = "This marble thinks it’s the Flash. It’s not.",
+        StatExplanation = "Slightly increases speed."
     },
     {
-        LevelUnlocked = "Level2Plate",
+        Rarity = "Common",
         Name = "Blue Jump",
         Color = Color3.fromRGB(0, 0, 255),
-        Description = "This marble has a bit of bounce to it."
+        Description = "Dreams of being an astronaut but stuck on Earth.",
+        StatExplanation = "Slightly increases jump height."
     },
     {
-        LevelUnlocked = "Level3Plate",
+        Rarity = "Common",
         Name = "Green Gravity",
         Color = Color3.fromRGB(0, 255, 0),
-        Description = "This marble feels lighter than air."
+        Description = "Rolls like it doesn’t care about physics.",
+        StatExplanation = "Decreases weight slightly."
     },
     {
-        LevelUnlocked = "Level4Plate",
+        Rarity = "Common",
+        Name = "Pebble",
+        Color = Color3.fromRGB(139, 69, 19),
+        Description = "Found it in your backyard. Nice.",
+        StatExplanation = "No special stats. It's just a pebble."
+    },
+    {
+        Rarity = "Common",
+        Name = "Plain Jane",
+        Color = Color3.fromRGB(200, 200, 200),
+        Description = "It’s as basic as marbles get.",
+        StatExplanation = "Completely average in every way."
+    },
+    {
+        Rarity = "Common",
+        Name = "Bubblegum",
+        Color = Color3.fromRGB(255, 182, 193),
+        Description = "Bright and sweet, but don’t chew it.",
+        StatExplanation = "No special effects, just good vibes."
+    },
+    {
+        Rarity = "Common",
+        Name = "Sandstorm",
+        Color = Color3.fromRGB(210, 180, 140),
+        Description = "Kicks up a tiny cloud of dust while rolling.",
+        StatExplanation = "Slightly reduces friction."
+    },
+    {
+        Rarity = "Common",
+        Name = "Mudball",
+        Color = Color3.fromRGB(101, 67, 33),
+        Description = "Rolls a little dirty, but it's durable.",
+        StatExplanation = "Slightly increases durability."
+    },
+    {
+        Rarity = "Common",
+        Name = "Snowball",
+        Color = Color3.fromRGB(240, 248, 255),
+        Description = "Cold to the touch, but won't melt.",
+        StatExplanation = "Slightly reduces opponent’s speed on contact."
+    },
+
+    -- Uncommon Marbles
+    {
+        Rarity = "Uncommon",
         Name = "Ice",
         Color = Color3.fromRGB(123, 205, 221),
-        Description = "Slippery and cold to the touch."
+        Description = "Slippery when wet. Wait, it's always slippery.",
+        StatExplanation = "Increases slide distance."
     },
     {
-        LevelUnlocked = "Level5Plate",
-        Name = "Steel",
-        Color = Color3.fromRGB(80, 80, 80),
-        Description = "Strong and heavy, like solid steel."
-    },
-    {
-        LevelUnlocked = "Level6Plate",
+        Rarity = "Uncommon",
         Name = "Lava",
         Color = Color3.fromRGB(255, 69, 0),
-        Description = "Hot and fiery, but cool to roll."
+        Description = "Hot and fiery, but won’t burn your hands.",
+        StatExplanation = "Leaves a fiery trail behind."
     },
     {
-        LevelUnlocked = "Level7Plate",
-        Name = "Golden Glow",
-        Color = Color3.fromRGB(255, 215, 0),
-        Description = "Shiny and regal, fit for champions."
+        Rarity = "Uncommon",
+        Name = "Steel",
+        Color = Color3.fromRGB(80, 80, 80),
+        Description = "Built like a tank but rolls like a marble.",
+        StatExplanation = "Increases weight and durability."
     },
     {
-        LevelUnlocked = "Level8Plate",
+        Rarity = "Uncommon",
+        Name = "Copper Core",
+        Color = Color3.fromRGB(184, 115, 51),
+        Description = "Looks like a penny, but bigger and shinier.",
+        StatExplanation = "Slightly increases magnetic pull to items."
+    },
+    {
+        Rarity = "Uncommon",
         Name = "Forest Jade",
         Color = Color3.fromRGB(34, 139, 34),
-        Description = "A smooth marble with an earthy vibe."
+        Description = "Rolls like it’s meditating in the woods.",
+        StatExplanation = "Decreases noise when rolling."
     },
     {
-        LevelUnlocked = "Level9Plate",
-        Name = "Shadow Sphere",
+        Rarity = "Uncommon",
+        Name = "Slimeball",
+        Color = Color3.fromRGB(0, 255, 0),
+        Description = "Squishy, bouncy, and a little gross.",
+        StatExplanation = "Leaves a sticky trail that slows others."
+    },
+    {
+        Rarity = "Uncommon",
+        Name = "Shadow Orb",
         Color = Color3.fromRGB(25, 25, 112),
-        Description = "A dark, mysterious orb."
+        Description = "Hides in the dark. Likes to surprise you.",
+        StatExplanation = "Slightly increases stealth."
     },
     {
-        LevelUnlocked = "Level10Plate",
+        Rarity = "Uncommon",
+        Name = "Golden Glow",
+        Color = Color3.fromRGB(255, 215, 0),
+        Description = "Looks expensive, rolls cheap.",
+        StatExplanation = "Grants bonus points on collection."
+    },
+    {
+        Rarity = "Uncommon",
+        Name = "Crystal Ball",
+        Color = Color3.fromRGB(230, 230, 250),
+        Description = "You won’t see your future, just your reflection.",
+        StatExplanation = "Becomes semi-invisible when rolling."
+    },
+
+    -- Rare Marbles
+    {
+        Rarity = "Rare",
         Name = "Rainbow Swirl",
         Color = Color3.fromRGB(255, 105, 180),
-        Description = "A colorful blend of hues."
+        Description = "Looks like candy, but don’t eat it!",
+        StatExplanation = "Grants a random buff on spawn."
     },
     {
-        LevelUnlocked = "Level11Plate",
+        Rarity = "Rare",
         Name = "Silver Streak",
         Color = Color3.fromRGB(192, 192, 192),
-        Description = "Smooth and shiny, like polished metal."
+        Description = "Fast enough to make Sonic jealous.",
+        StatExplanation = "Greatly increases speed."
     },
     {
-        LevelUnlocked = "Level12Plate",
-        Name = "Crystal Clear",
-        Color = Color3.fromRGB(230, 230, 250),
-        Description = "Almost invisible, like pure glass."
+        Rarity = "Rare",
+        Name = "Fireball",
+        Color = Color3.fromRGB(255, 69, 0),
+        Description = "Is it rolling or burning? Both.",
+        StatExplanation = "Creates a temporary speed boost."
     },
     {
-        LevelUnlocked = "Level13Plate",
-        Name = "Galaxy",
-        Color = Color3.fromRGB(75, 0, 130),
-        Description = "A marble filled with cosmic wonder."
-    },
-    {
-        LevelUnlocked = "Level14Plate",
-        Name = "Tropical Breeze",
-        Color = Color3.fromRGB(0, 255, 127),
-        Description = "A vibrant marble with island vibes."
-    },
-    {
-        LevelUnlocked = "Level15Plate",
-        Name = "Volcano",
-        Color = Color3.fromRGB(255, 99, 71),
-        Description = "Erupting with energy and power."
-    },
-    {
-        LevelUnlocked = "Level16Plate",
-        Name = "Obsidian",
-        Color = Color3.fromRGB(54, 54, 54),
-        Description = "Sharp and sleek, forged in darkness."
-    },
-    {
-        LevelUnlocked = "Level17Plate",
+        Rarity = "Rare",
         Name = "Aurora Glow",
         Color = Color3.fromRGB(173, 216, 230),
-        Description = "Radiates a northern light shimmer."
+        Description = "Lights up like a disco ball. Party time!",
+        StatExplanation = "Grants a glow that lights up the path."
+    },
+
+    -- Epic Marbles
+    {
+        Rarity = "Epic",
+        Name = "Galaxy",
+        Color = Color3.fromRGB(75, 0, 130),
+        Description = "Contains a whole universe. Or does it?",
+        StatExplanation = "Increases roll control and style points."
     },
     {
-        LevelUnlocked = "Level18Plate",
-        Name = "Toxic Slime",
-        Color = Color3.fromRGB(0, 255, 0),
-        Description = "Glows with an eerie green light."
+        Rarity = "Epic",
+        Name = "Phoenix Feather",
+        Color = Color3.fromRGB(255, 140, 0),
+        Description = "Rises from the ashes of failure. Literally.",
+        StatExplanation = "Self-repairs after falling."
+    },
+
+    -- Legendary Marbles
+    {
+        Rarity = "Legendary",
+        Name = "Volcano",
+        Color = Color3.fromRGB(255, 99, 71),
+        Description = "Erupting with power and unpredictability.",
+        StatExplanation = "Creates small shockwaves on landing."
     },
     {
-        LevelUnlocked = "Level19Plate",
-        Name = "Desert Sand",
-        Color = Color3.fromRGB(210, 180, 140),
-        Description = "Rough and textured, like desert dunes."
+        Rarity = "Legendary",
+        Name = "Soul Marble",
+        Color = Color3.fromRGB(255, 20, 147),
+        Description = "Whispers secrets of ancient marbles.",
+        StatExplanation = "Greatly increases roll stability."
     },
+
+    -- Transcendent Marble
     {
-        LevelUnlocked = "Level20Plate",
-        Name = "Diamond",
-        Color = Color3.fromRGB(185, 242, 255),
-        Description = "Unbreakable and dazzlingly bright."
+        Rarity = "Transcendent",
+        Name = "Infinity Roll",
+        Color = Color3.fromRGB(128, 0, 128),
+        Description = "Never stops rolling. Ever. Good luck catching it.",
+        StatExplanation = "Automatically rolls without losing momentum."
     }
 }

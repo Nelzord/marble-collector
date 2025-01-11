@@ -54,7 +54,7 @@ local function loadPlayerInventory(player)
     }
     
     local success, data = pcall(function()
-        playerInventoryDataStore:RemoveAsync(player.UserId)
+        -- playerInventoryDataStore:RemoveAsync(player.UserId)
         return playerInventoryDataStore:GetAsync(player.UserId)
     end)
     
