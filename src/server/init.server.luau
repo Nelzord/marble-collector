@@ -65,6 +65,7 @@ game.Players.PlayerAdded:Connect(function(player)
         marble.Shape = Enum.PartType.Ball
         marble.Material = Enum.Material.SmoothPlastic
         marble.Parent = char
+        changeMarbleTexture(marble, "rbxassetid://80502554386009")
 
         -- Position the marble above the baseplate by the character's height
         local characterHeight = (Hum.HipHeight * 2) + 5 -- Adjust as necessary

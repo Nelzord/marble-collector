@@ -15,22 +15,41 @@ local openMarbleShop = ReplicatedStorage:WaitForChild("OpenMarbleShop")
 local marbleTextureChangeEvent = ReplicatedStorage:WaitForChild("MarbleTextureChangeEvent")
 
 
--- Function to create a rotating marble
-local function createRotatingMarble(viewportFrame, color)
+local function createRotatingMarble(viewportFrame, color, textureId)
+    -- Create the marble part
     local marblePart = Instance.new("Part")
     marblePart.Shape = Enum.PartType.Ball
     marblePart.Size = Vector3.new(7, 7, 7)
-    marblePart.Color = color
     marblePart.Anchored = true
     marblePart.Parent = viewportFrame
 
+    -- Apply texture using Decal
+    if textureId then
+        for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+            local decal = Instance.new("Decal")
+            decal.Texture = textureId
+            decal.Face = face
+            decal.Parent = marblePart
+        end
+        print("Applied texture to marble:", textureId)
+    else
+        -- Fallback to color if no texture provided
+        marblePart.Color = color
+        print("No textureId provided. Using color:", color)
+    end
+
+    -- Create and set up the camera for the viewport frame
     local viewportCamera = Instance.new("Camera")
     viewportCamera.CFrame = CFrame.new(Vector3.new(0, 0, 15), Vector3.new(0, 0, 0))
     viewportFrame.CurrentCamera = viewportCamera
 
-    RunService.RenderStepped:Connect(function()
+    -- Add rotation animation for the marble
+    local rotationConnection
+    rotationConnection = game:GetService("RunService").RenderStepped:Connect(function()
         if marblePart.Parent then
             marblePart.CFrame = marblePart.CFrame * CFrame.Angles(0, math.rad(1), 0)
+        else
+            rotationConnection:Disconnect() -- Disconnect if the marble is removed
         end
     end)
 end
@@ -75,7 +94,7 @@ local function populateInventory(scrollingFrame, tooltip)
         viewportFrame.BackgroundTransparency = 1
         viewportFrame.Parent = marbleFrame
 
-        createRotatingMarble(viewportFrame, marbleData.Color)
+        createRotatingMarble(viewportFrame, marbleData.Color, marbleData.TextureId)
 
         -- Create name label
         local nameLabel = Instance.new("TextLabel")

@@ -7,7 +7,8 @@ return {
         Color = Color3.fromRGB(0, 0, 0),
         Description = "Just your ordinary marble. It's as exciting as plain toast.",
         StatExplanation = "No special stats. It's just a marble.",
-        LevelUnlocked = "Level1Plate"
+        LevelUnlocked = "Level1Plate",
+        TextureId = "rbxassetid://80502554386009"
     },
     {
         Rarity = "Common",
@@ -234,6 +235,7 @@ return {
         Color = Color3.fromRGB(128, 0, 128),
         Description = "Never stops rolling. Ever. Good luck catching it.",
         StatExplanation = "Automatically rolls without losing momentum.",
-        LevelUnlocked = "Level28Plate"
+        LevelUnlocked = "Level28Plate",
+        TextureId = "rbxassetid://104078605767729"
     }
 }
