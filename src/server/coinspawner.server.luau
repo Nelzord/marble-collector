@@ -6,7 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local addCoinsEvent = ReplicatedStorage:WaitForChild("AddCoinsEvent")
 
 -- Maximum number of coins allowed in the workspace at once
-local maxCoins = 5
+local maxCoins = 20
 local currentCoins = {}
 
 -- Folder containing level subfolders

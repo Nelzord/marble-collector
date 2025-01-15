@@ -18,7 +18,8 @@ return {
         Color = Color3.fromRGB(255, 99, 71),
         Description = "Erupting with power and unpredictability.",
         StatExplanation = "Creates small shockwaves on landing.",
-        LevelUnlocked = "Level26Plate"
+        LevelUnlocked = "Level26Plate",
+        TextureId = "rbxassetid://118708454198753"
     },
     {
         Rarity = "Legendary",
@@ -37,7 +38,8 @@ return {
         Color = Color3.fromRGB(75, 0, 130),
         Description = "Contains a whole universe. Or does it?",
         StatExplanation = "Increases roll control and style points.",
-        LevelUnlocked = "Level24Plate"
+        LevelUnlocked = "Level24Plate",
+        TextureId = "rbxassetid://115598452255953"
     },
     {
         Rarity = "Epic",
@@ -45,7 +47,8 @@ return {
         Color = Color3.fromRGB(255, 140, 0),
         Description = "Rises from the ashes of failure. Literally.",
         StatExplanation = "Self-repairs after falling.",
-        LevelUnlocked = "Level25Plate"
+        LevelUnlocked = "Level25Plate",
+        TextureId = "rbxassetid://125620103959929"
     },
     {
         Rarity = "Epic",
@@ -53,7 +56,8 @@ return {
         Color = Color3.fromRGB(255, 105, 180),
         Description = "Looks like candy, but don’t eat it!",
         StatExplanation = "Grants a random buff on spawn.",
-        LevelUnlocked = "Level20Plate"
+        LevelUnlocked = "Level20Plate",
+        TextureId = "rbxassetid://110789456379251"
     },
 
     -- Rare/Common Marbles
@@ -63,7 +67,8 @@ return {
         Color = Color3.fromRGB(192, 192, 192),
         Description = "Fast enough to make Sonic jealous.",
         StatExplanation = "Greatly increases speed.",
-        LevelUnlocked = "Level21Plate"
+        LevelUnlocked = "Level21Plate",
+        TextureId = "rbxassetid://118421502908413"
     },
     {
         Rarity = "Common",
@@ -80,7 +85,8 @@ return {
         Color = Color3.fromRGB(240, 248, 255),
         Description = "Cold to the touch, but won't melt.",
         StatExplanation = "Slightly reduces opponent’s speed on contact.",
-        LevelUnlocked = "Level10Plate"
+        LevelUnlocked = "Level10Plate",
+        TextureId = "rbxassetid://108985481211081"
     },
     {
         Rarity = "Common",
@@ -88,6 +94,7 @@ return {
         Color = Color3.fromRGB(255, 182, 193),
         Description = "Bright and sweet, but don’t chew it.",
         StatExplanation = "No special effects, just good vibes.",
-        LevelUnlocked = "Level7Plate"
+        LevelUnlocked = "Level7Plate",
+        TextureId = "rbxassetid://115781799953223"
     }
 }
