@@ -23,6 +23,11 @@ local deathSoundEvent = Instance.new("RemoteEvent")
 deathSoundEvent.Name = "DeathSoundEvent"
 deathSoundEvent.Parent = ReplicatedStorage
 
+-- Create the RemoteEvent for adding coins
+local addCoinsEvent = Instance.new("RemoteEvent")
+addCoinsEvent.Name = "AddCoinsEvent"
+addCoinsEvent.Parent = ReplicatedStorage
+
 
 
 local playerInventories = {} -- Store player inventories in memory
@@ -52,47 +57,57 @@ local function printInventory(player)
         else
             print("No marbles unlocked yet.")
         end
+        print("Coins: " .. (inventory.coins or 0))
         print("=== End of Inventory ===")
     else
         print("No inventory found for player: " .. player.Name)
     end
 end
 
--- Function to load player inventory from DataStore
 local function loadPlayerInventory(player)
-    local inventory = {
-        beatenLevels = {}, -- Track completed levels
-        unlockedMarbles = {}, -- Track unlocked marbles
+    local defaultInventory = {
+        beatenLevels = {},
+        unlockedMarbles = {"DefaultMarble"}, -- Default marble
+        coins = 0, -- Default coins
     }
-    
+
     local success, data = pcall(function()
-        -- playerInventoryDataStore:RemoveAsync(player.UserId)
         return playerInventoryDataStore:GetAsync(player.UserId)
     end)
-    
+
     if success and data then
-        inventory = data
+        -- Merge with default inventory to handle missing keys
+        for key, value in pairs(defaultInventory) do
+            if data[key] == nil then
+                data[key] = value
+            end
+        end
+        playerInventories[player.UserId] = data
+    else
+        -- If no data, use the default inventory
+        playerInventories[player.UserId] = defaultInventory
     end
 
-    -- Ensure the default marble is in the inventory
-    if not table.find(inventory.unlockedMarbles, "DefaultMarble") then
-        table.insert(inventory.unlockedMarbles, "DefaultMarble")
-    end
-    
-    playerInventories[player.UserId] = inventory
+    -- Debugging: Ensure the inventory is loaded correctly
     printInventory(player)
-    return inventory
+    return playerInventories[player.UserId]
 end
 
--- Function to save player inventory to DataStore
 local function savePlayerInventory(player)
     local inventory = playerInventories[player.UserId]
     if inventory then
-        pcall(function()
+        print("Saving inventory for player:", player.Name, "Inventory:", inventory)
+        local success, err = pcall(function()
             playerInventoryDataStore:SetAsync(player.UserId, inventory)
         end)
+        if not success then
+            warn("Failed to save inventory for player:", player.Name, "Error:", err)
+        end
+    else
+        warn("No inventory to save for player:", player.Name)
     end
 end
+
 
 -- Function to unlock a marble
 local function unlockMarble(player, marbleName)
@@ -103,6 +118,7 @@ local function unlockMarble(player, marbleName)
         savePlayerInventory(player)
     end
 end
+
 
 -- Function to unlock all marbles for a player
 local function unlockAllMarbles(player)
@@ -203,11 +219,43 @@ local function monitorMarble(player, character)
     end)
 end
 
+local function addCoins(player, amount)
+    local inventory = playerInventories[player.UserId]
+    if inventory then
+        -- Update the in-memory inventory
+        inventory.coins = (inventory.coins or 0) + amount
+        print(player.Name .. " earned " .. amount .. " coins. Total: " .. inventory.coins)
+
+        -- Save the updated inventory
+        local success, err = pcall(function()
+            playerInventoryDataStore:SetAsync(player.UserId, inventory)
+        end)
+        if not success then
+            warn("Failed to save inventory for player: " .. player.Name .. ". Error: " .. err)
+        end
+
+        -- Notify the client about the updated coin count
+        addCoinsEvent:FireClient(player, amount)
+    else
+        warn("No inventory found for player: " .. player.Name)
+    end
+end
+
+
+-- Handle the add coins request from the client
+addCoinsEvent.OnServerEvent:Connect(function(player, amount)
+    if typeof(amount) == "number" and amount > 0 then
+        addCoins(player, amount)
+    else
+        warn("Invalid coin amount received from player: " .. player.Name)
+    end
+end)
+
 
 
 game.Players.PlayerAdded:Connect(function(player)
-    -- Load the player's inventory upon joining
-    local inventory = loadPlayerInventory(player)
+    -- Load the player's inventory
+    loadPlayerInventory(player)
 
     player.CharacterAdded:Connect(function(character)
         print(player.Name .. "'s character added.")
@@ -219,19 +267,11 @@ game.Players.PlayerAdded:Connect(function(player)
 
         if success and part then
             print(player.Name .. "'s character is ready for monitoring.")
-
-            -- Start monitoring the character as the marble
             monitorMarble(player, character)
         else
-            warn("Character failed to load properly for:", player.Name)
+            warn("Character failed to load properly for: " .. player.Name)
         end
     end)
-
-    -- Handle cases where the character already exists (e.g., rejoining quickly)
-    if player.Character then
-        print(player.Name .. "'s character already exists. Connecting to it.")
-        monitorMarble(player, player.Character)
-    end
 end)
 
 -- Add this to the server script
@@ -244,16 +284,31 @@ unlockMarbleEvent.OnServerEvent:Connect(function(player, marbleName)
     end
 end)
 
+
 -- Save inventory when the player leaves
 game.Players.PlayerRemoving:Connect(function(player)
     savePlayerInventory(player)
     playerInventories[player.UserId] = nil -- Remove from memory
 end)
 
--- Fetch inventory (RemoteFunction)
+
 fetchInventoryFunction.OnServerInvoke = function(player)
-    return playerInventories[player.UserId] or {
-        beatenLevels = {},
-        unlockedMarbles = {"DefaultMarble"}, -- Ensure the default marble is returned
-    }
+    local inventory = playerInventories[player.UserId]
+    if inventory then
+        -- Print the inventory for debugging
+        print("FetchInventoryFunction invoked for:", player.Name, "Inventory:", inventory)
+
+        return {
+            coins = inventory.coins or 0,
+            beatenLevels = inventory.beatenLevels or {},
+            unlockedMarbles = inventory.unlockedMarbles or {"DefaultMarble"},
+        }
+    else
+        warn("No inventory found for player: " .. player.Name .. ". Returning default inventory.")
+        return {
+            coins = 0,
+            beatenLevels = {},
+            unlockedMarbles = {"DefaultMarble"},
+        }
+    end
 end

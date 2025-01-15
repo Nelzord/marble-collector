@@ -24,7 +24,7 @@ local function createGamepassGui()
 
     local gamepassFrame = Instance.new("Frame")
     gamepassFrame.Size = UDim2.new(0.2, 0, 0.6, 0)
-    gamepassFrame.Position = UDim2.new(0.8, 0, 0.2, 0)
+    gamepassFrame.Position = UDim2.new(0.8, 0, 0.4, 0) -- Lowered position to avoid overlapping coins
     gamepassFrame.BackgroundTransparency = 1 -- Make the frame background invisible
     gamepassFrame.Parent = screenGui
 
@@ -33,7 +33,7 @@ local function createGamepassGui()
         local button = Instance.new("TextButton")
         button.Size = UDim2.new(0, 60, 0, 60) -- Circular buttons (Width = Height)
         button.Position = UDim2.new(0.5, 0, (#gamepassFrame:GetChildren() - 1) * 0.2, 0) -- Space buttons vertically
-        button.BackgroundColor3 = Color3.fromRGB(255,255, 255) -- White text
+        button.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- White button
         button.Font = Enum.Font.SourceSansBold
         button.TextSize = 14
         button.Text = gamepass.Name
