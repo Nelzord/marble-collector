@@ -10,6 +10,24 @@ local fetchInventoryFunction = ReplicatedStorage:WaitForChild("FetchInventoryFun
 local lastCoinCollectionTime = 0
 local coinCollectionCooldown = 0.5 -- 0.5 seconds cooldown between coin collections
 
+
+-- Coin sound asset ID
+local coinSoundId = "rbxassetid://3125624765"
+
+-- Function to play the coin sound
+local function playCoinSound()
+    -- Create a new sound instance
+    local coinSound = Instance.new("Sound")
+    coinSound.SoundId = coinSoundId
+    coinSound.Volume = .25 -- Adjust volume as needed
+    coinSound.PlayOnRemove = true -- Ensure the sound plays when removed
+    coinSound.Parent = Player:WaitForChild("PlayerGui") -- Parent to PlayerGui or other client-side container
+
+    -- Play and clean up the sound
+    coinSound:Destroy() -- `PlayOnRemove` ensures the sound plays
+end
+
+
 -- Function to create the UI
 local function createUI()
     if Player:FindFirstChild("PlayerGui"):FindFirstChild("CoinsDisplay") then
@@ -106,4 +124,5 @@ end)
 -- Listen for coin updates from the server
 addCoinsEvent.OnClientEvent:Connect(function(newAmount)
     incrementCoinCount(newAmount)
+    playCoinSound()
 end)
