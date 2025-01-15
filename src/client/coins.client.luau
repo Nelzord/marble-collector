@@ -19,7 +19,7 @@ local function playCoinSound()
     -- Create a new sound instance
     local coinSound = Instance.new("Sound")
     coinSound.SoundId = coinSoundId
-    coinSound.Volume = .25 -- Adjust volume as needed
+    coinSound.Volume = .20 -- Adjust volume as needed
     coinSound.PlayOnRemove = true -- Ensure the sound plays when removed
     coinSound.Parent = Player:WaitForChild("PlayerGui") -- Parent to PlayerGui or other client-side container
 

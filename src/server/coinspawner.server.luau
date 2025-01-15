@@ -5,25 +5,36 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- RemoteEvent for adding coins
 local addCoinsEvent = ReplicatedStorage:WaitForChild("AddCoinsEvent")
 
--- Set the spawn area
-local spawnRegion = {
-    minX = -50,
-    maxX = 50,
-    minY = 5,
-    maxY = 5,
-    minZ = -50,
-    maxZ = 50,
-}
-
 -- Maximum number of coins allowed in the workspace at once
 local maxCoins = 5
 local currentCoins = {}
+
+-- Folder containing level subfolders
+local levelsFolder = Workspace:WaitForChild("Levels")
+
+-- Height above the plate where coins spawn
+local spawnHeight = 3 -- Adjust as needed to allow characters to walk up
+
+-- Variance in random X/Z position
+local spawnVariance = 50 -- Variance in studs for X/Z position
+
+-- Function to get a random spawn position around a LevelXPlate
+local function getRandomSpawnPosition(plate)
+    local platePosition = plate.Position
+
+    -- Randomize X/Z positions with the given variance
+    local randomX = platePosition.X + math.random(-spawnVariance, spawnVariance)
+    local randomZ = platePosition.Z + math.random(-spawnVariance, spawnVariance)
+
+    -- Return the calculated spawn position above the plate
+    return Vector3.new(randomX, platePosition.Y + spawnHeight, randomZ)
+end
 
 -- Function to create a realistic coin
 local function createCoin()
     local coin = Instance.new("Part")
     coin.Shape = Enum.PartType.Cylinder -- Set shape to cylinder
-    coin.Size = Vector3.new(.5, 7, 7) -- Larger coin size (diameter, thickness)
+    coin.Size = Vector3.new(0.5, 7, 7) -- Coin size (thickness, diameter)
     coin.BrickColor = BrickColor.new("Bright yellow") -- Gold color
     coin.Material = Enum.Material.SmoothPlastic -- Smooth, shiny appearance
     coin.Anchored = true -- Anchor to make it hover
@@ -47,26 +58,49 @@ local function animateCoin(coin)
     game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
         -- Hovering effect
         local hoverOffset = math.sin(tick() * hoverSpeed) * hoverAmplitude
-        coin.Position = Vector3.new(coin.Position.X, initialY + hoverOffset, coin.Position.Z)
+        coin.Position = Vector3.new(coin.Position.X, initialY + 10, coin.Position.Z)
 
         -- Spinning effect
         coin.Orientation = coin.Orientation + Vector3.new(0, spinSpeed * deltaTime, 0)
     end)
 end
 
--- Function to spawn a coin in the workspace
+-- Function to spawn a coin near a random LevelXPlate
 local function spawnCoin()
     -- Ensure the number of coins does not exceed the maximum
     if #currentCoins >= maxCoins then
         return
     end
 
+    -- Get all LevelXPlates in the Levels folder
+    local plates = {}
+    for _, levelFolder in pairs(levelsFolder:GetChildren()) do
+        if levelFolder:IsA("Folder") then
+            for _, plate in pairs(levelFolder:GetChildren()) do
+                if plate:IsA("BasePart") and plate.Name:match("Level%dPlate") then
+                    table.insert(plates, plate)
+                end
+            end
+        end
+    end
+
+    -- Select a random plate
+    if #plates == 0 then
+        warn("No LevelXPlates found for coin spawning.")
+        return
+    end
+    local selectedPlate = plates[math.random(1, #plates)]
+
+    -- Calculate spawn position
+    local spawnPosition = getRandomSpawnPosition(selectedPlate)
+
+    -- Log the plate name and spawn position
+    print(string.format("Coin spawned near plate: %s at position: (%.2f, %.2f, %.2f)",
+        selectedPlate.Name, spawnPosition.X, spawnPosition.Y, spawnPosition.Z))
+
+    -- Create and position the coin
     local coin = createCoin()
-    coin.Position = Vector3.new(
-        math.random(spawnRegion.minX, spawnRegion.maxX),
-        math.random(spawnRegion.minY, spawnRegion.maxY),
-        math.random(spawnRegion.minZ, spawnRegion.maxZ)
-    )
+    coin.Position = spawnPosition
 
     -- Add touch functionality to the coin
     coin.Touched:Connect(function(hit)
