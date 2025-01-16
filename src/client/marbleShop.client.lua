@@ -223,7 +223,7 @@ local function createShopUI()
         end)
     end
 
-    createRollSection("Basic", "Basic Marble Roll (50 Coins)", "Inspect Basic Marbles", "Buy Basic Marble Roll", basicRollEvent, UDim2.new(0.1, 0, 0, 0), "Common")
+createRollSection("Basic", "Basic Marble Roll (50 Coins)", "Inspect Basic Marbles", "Buy Basic Marble Roll", basicRollEvent, UDim2.new(0.1, 0, 0, 0), "Common")
 createRollSection("Rare", "Rare Marble Roll (150 Coins)", "Inspect Rare Marbles", "Buy Rare Marble Roll", rareRollEvent, UDim2.new(0.1, 0, 0.35, 0), "Rare")
 createRollSection("Legendary", "Legendary Marble Roll (500 Coins)", "Inspect Legendary Marbles", "Buy Legendary Marble Roll", legendaryRollEvent, UDim2.new(0.1, 0, 0.7, 0), "Legendary")
 

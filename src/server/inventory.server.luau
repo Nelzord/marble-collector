@@ -161,6 +161,29 @@ local function playerOwnsGamepass(player, gamepassId)
     end
 end
 
+local function addCoins(player, amount)
+    local inventory = playerInventories[player.UserId]
+    if inventory then
+        -- Update the in-memory inventory
+        inventory.coins = (inventory.coins or 0) + amount
+        print(player.Name .. " earned " .. amount .. " coins. Total: " .. inventory.coins)
+
+        -- Save the updated inventory
+        local success, err = pcall(function()
+            playerInventoryDataStore:SetAsync(player.UserId, inventory)
+        end)
+        if not success then
+            warn("Failed to save inventory for player: " .. player.Name .. ". Error: " .. err)
+        end
+
+        -- Notify the client about the updated coin count
+        addCoinsEvent:FireClient(player, amount)
+    else
+        warn("No inventory found for player: " .. player.Name)
+    end
+end
+
+
 
 -- Function to mark a level as beaten and update the inventory
 local function completeLevel(player, levelName)
@@ -173,6 +196,8 @@ local function completeLevel(player, levelName)
             print(player.Name .. " completed level: " .. levelName)
             printInventory(player)
             -- Save the updated inventory to the DataStore
+            addCoins(player, 5)
+            addCoinsEvent:FireClient(player, 5)
             savePlayerInventory(player)
         else
             print(player.Name .. " has already completed level: " .. levelName)
@@ -212,6 +237,14 @@ local function monitorMarble(player, character)
                 if humanoid then
                     humanoid.Health = 0
                 end
+
+            elseif hit and hit:IsA("BasePart") and hit.Name:match("Level(%d+)Plate") then
+            local levelNumber = tonumber(hit.Name:match("Level(%d+)"))
+            if levelNumber then
+                local levelName = "Level" .. levelNumber .. "Plate"
+                completeLevel(player, levelName)
+            end
+        else
             end
         else
             print("Invalid part touched by:", player.Name)
@@ -219,27 +252,6 @@ local function monitorMarble(player, character)
     end)
 end
 
-local function addCoins(player, amount)
-    local inventory = playerInventories[player.UserId]
-    if inventory then
-        -- Update the in-memory inventory
-        inventory.coins = (inventory.coins or 0) + amount
-        print(player.Name .. " earned " .. amount .. " coins. Total: " .. inventory.coins)
-
-        -- Save the updated inventory
-        local success, err = pcall(function()
-            playerInventoryDataStore:SetAsync(player.UserId, inventory)
-        end)
-        if not success then
-            warn("Failed to save inventory for player: " .. player.Name .. ". Error: " .. err)
-        end
-
-        -- Notify the client about the updated coin count
-        addCoinsEvent:FireClient(player, amount)
-    else
-        warn("No inventory found for player: " .. player.Name)
-    end
-end
 
 
 -- Handle the add coins request from the client
@@ -254,6 +266,18 @@ end)
 
 
 game.Players.PlayerAdded:Connect(function(player)
+
+
+    -- local success, err = pcall(function()
+    --     playerInventoryDataStore:RemoveAsync(player.UserId)
+    -- end)
+
+    -- if success then
+    --     print("Removed inventory for player:", player.Name)
+    -- else
+    --     warn("Failed to remove inventory for player:", player.Name, "Error:", err)
+    -- end
+
     -- Load the player's inventory
     loadPlayerInventory(player)
 

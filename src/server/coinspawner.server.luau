@@ -132,6 +132,6 @@ end
 
 -- Spawn coins periodically
 while true do
-    spawnCoin()
+    -- spawnCoin()
     wait(10) -- Spawn a coin every 10 seconds (adjust as needed)
 end
