@@ -97,8 +97,8 @@ game.Players.PlayerAdded:Connect(function(player)
         -- Set the character to PlatformStand to prevent walking
         Hum.PlatformStand = true
 
-
         -- Handle movement
+        local lastVelocity = Vector3.zero -- Tracks the marble's last velocity
         game:GetService("RunService").Heartbeat:Connect(function()
             local moveDirection = char.Humanoid.MoveDirection
 
@@ -109,22 +109,33 @@ game.Players.PlayerAdded:Connect(function(player)
                 moveDirection.X * -20
             )
 
-            -- Uncomment for spinning effect
+            -- Set the marble's angular velocity
             Velocity.AngularVelocity = targetAngularVelocity
 
             -- Set BodyVelocity to move the marble in the desired direction
-            BodyVelocity.Velocity = moveDirection * 40 -- Adjust speed as necessary
+            if moveDirection.Magnitude > 0 then
+                BodyVelocity.Velocity = moveDirection * 40 -- Adjust speed as necessary
+                lastVelocity = BodyVelocity.Velocity -- Update lastVelocity when actively moving
+            else
+                -- Gradually slow down the marble using friction
+                lastVelocity = lastVelocity * 0.95 -- Apply friction effect (adjust 0.95 as needed)
+                BodyVelocity.Velocity = lastVelocity
+
+                -- Stop completely when the velocity is very small
+                if lastVelocity.Magnitude < 0.1 then
+                    BodyVelocity.Velocity = Vector3.zero
+                    lastVelocity = Vector3.zero
+                end
+            end
 
             -- Enable torque only when moving
-            if moveDirection.Magnitude == 0 then
+            if BodyVelocity.Velocity.Magnitude == 0 then
                 Velocity.MaxTorque = Vector3.zero
-                BodyVelocity.Velocity = Vector3.zero
             else
                 Velocity.MaxTorque = Vector3.new(30000, 30000, 30000)
             end
         end)
 
-        -- Replace the groundCheck logic with Raycasting
         remoteEvent.OnServerEvent:Connect(function(plr)
             if plr == player then
                 -- Raycast downward to check if the marble is grounded
@@ -133,29 +144,49 @@ game.Players.PlayerAdded:Connect(function(player)
                 local raycastParams = RaycastParams.new()
                 raycastParams.FilterDescendantsInstances = {marble, char} -- Ignore marble and character
                 raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-
+        
                 local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-
+        
                 -- If the ray hits a surface, the marble is grounded
                 if result then
                     local jumpForce = 5000 -- Adjust the jump force as needed
-
+        
                     -- Disable and remove the Weld
                     Weld.Enabled = false
-
+        
+                    -- Make the player's character invisible
+                    for _, part in ipairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.Transparency = 1 -- Make the part invisible
+                        elseif part:IsA("Decal") then
+                            part.Transparency = 1 -- Make decals invisible as well
+                        end
+                    end
+        
                     -- Apply the jump impulse
                     marble:ApplyImpulse(Vector3.new(0, jumpForce, 0))
-
+        
                     -- Re-enable the Weld after a short delay
-                    task.wait(0.001) -- Adjust the delay as necessary
+                    task.wait(0.005) -- Adjust the delay as necessary
                     Weld.Enabled = true
-
+        
+                    -- Restore the player's character visibility
+                    for _, part in ipairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.Transparency = 0 -- Restore visibility
+                        elseif part:IsA("Decal") then
+                            part.Transparency = 0 -- Restore decal visibility
+                        end
+                    end
+        
                     print("Jump simulated on surface:", result.Instance.Name)
                 end
             end
         end)
+        
     end)
 end)
+
 
 local TeleportToLevelEvent = Instance.new("RemoteEvent", ReplicatedStorage)
 TeleportToLevelEvent.Name = "TeleportToLevelEvent"

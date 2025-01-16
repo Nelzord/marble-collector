@@ -10,23 +10,18 @@ local fetchInventoryFunction = ReplicatedStorage:WaitForChild("FetchInventoryFun
 local lastCoinCollectionTime = 0
 local coinCollectionCooldown = 0.5 -- 0.5 seconds cooldown between coin collections
 
-
 -- Coin sound asset ID
 local coinSoundId = "rbxassetid://3125624765"
 
 -- Function to play the coin sound
 local function playCoinSound()
-    -- Create a new sound instance
     local coinSound = Instance.new("Sound")
     coinSound.SoundId = coinSoundId
-    coinSound.Volume = .20 -- Adjust volume as needed
-    coinSound.PlayOnRemove = true -- Ensure the sound plays when removed
-    coinSound.Parent = Player:WaitForChild("PlayerGui") -- Parent to PlayerGui or other client-side container
-
-    -- Play and clean up the sound
+    coinSound.Volume = 0.2
+    coinSound.PlayOnRemove = true
+    coinSound.Parent = Player:WaitForChild("PlayerGui")
     coinSound:Destroy() -- `PlayOnRemove` ensures the sound plays
 end
-
 
 -- Function to create the UI
 local function createUI()
@@ -42,21 +37,49 @@ local function createUI()
     frame.Name = "CoinsFrame"
     frame.AnchorPoint = Vector2.new(1, 0)
     frame.Position = UDim2.new(1, -20, 0, 20)
-    frame.Size = UDim2.new(0, 200, 0, 50)
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    frame.BackgroundTransparency = 0.5
+    frame.Size = UDim2.new(0, 220, 0, 60)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    frame.BackgroundTransparency = 0.3
     frame.BorderSizePixel = 0
     frame.Parent = screenGui
 
+    -- Add rounded corners
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = frame
+
+    -- Add a stroke to the frame
+    local uiStroke = Instance.new("UIStroke")
+    uiStroke.Thickness = 2
+    uiStroke.Color = Color3.fromRGB(255, 215, 0)
+    uiStroke.Parent = frame
+
     local coinLabel = Instance.new("TextLabel")
     coinLabel.Name = "CoinLabel"
-    coinLabel.Size = UDim2.new(1, 0, 1, 0)
+    coinLabel.Size = UDim2.new(1, -10, 1, -10)
+    coinLabel.Position = UDim2.new(0, 5, 0, 5)
     coinLabel.BackgroundTransparency = 1
     coinLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
-    coinLabel.Font = Enum.Font.SourceSansBold
+    coinLabel.Font = Enum.Font.GothamBold
     coinLabel.TextScaled = true
     coinLabel.Text = "Coins: 0"
     coinLabel.Parent = frame
+
+    -- Add text shadow effect
+    local textShadow = Instance.new("TextLabel")
+    textShadow.Size = coinLabel.Size
+    textShadow.Position = coinLabel.Position
+    textShadow.BackgroundTransparency = 1
+    textShadow.TextColor3 = Color3.fromRGB(0, 0, 0)
+    textShadow.Font = coinLabel.Font
+    textShadow.TextScaled = coinLabel.TextScaled
+    textShadow.Text = coinLabel.Text
+    textShadow.ZIndex = coinLabel.ZIndex - 1
+    textShadow.Parent = frame
+
+    coinLabel:GetPropertyChangedSignal("Text"):Connect(function()
+        textShadow.Text = coinLabel.Text
+    end)
 end
 
 -- Function to update the coin count locally
