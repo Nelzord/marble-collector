@@ -262,3 +262,14 @@ local function createShopButton()
 end
 
 createShopButton()
+
+player.CharacterAdded:Connect(function()
+    createShopButton()
+end)
+
+remoteEvent.OnClientEvent:Connect(function()
+    if not marbleShopGui then
+        createShopUI()
+    end
+    marbleShopGui.Enabled = not marbleShopGui.Enabled
+end)
